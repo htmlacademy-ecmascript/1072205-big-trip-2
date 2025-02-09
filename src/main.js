@@ -1,5 +1,7 @@
 import PagePresenter from './presenter/page-presenter.js';
+import EventsModel from './model/events-model.js';
 
-const pagePresenter = new PagePresenter();
+const eventsModel = new EventsModel();
+const pagePresenter = new PagePresenter(eventsModel);
 
 pagePresenter.init();

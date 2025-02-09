@@ -13,16 +13,22 @@ const siteMainElement = document.querySelector('.page-main');
 const tripEventElement = siteMainElement.querySelector('.trip-events');
 
 export default class PagePresenter {
+  constructor(eventsModel) {
+    this.eventsModel = eventsModel;
+  }
 
   init() {
+    this.tripEvents = [...this.eventsModel.getEvents()];
+
     render(new TripInfoView(), tripMainElement, RenderPosition.AFTERBEGIN);
     render(new FiltersView(), filtersElement);
     render(new SortView(), tripEventElement);
     render(new EventListView(), tripEventElement);
     const tripEventsListElement = document.querySelector('.trip-events__list');
     render(new EventEditFormView(), tripEventsListElement);
-    for (let i = 0; i < 3; i++) {
-      render(new EventView(), tripEventsListElement);
+
+    for (let i = 0; i < this.tripEvents.length; i++) {
+      render(new EventView({event: this.tripEvents[i]}), tripEventsListElement);
     }
   }
 }
