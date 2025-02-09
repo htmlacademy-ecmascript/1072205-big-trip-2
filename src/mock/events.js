@@ -1,5 +1,5 @@
-import { EVENT_TYPES } from "../const.js";
-import { getRandomArrayElement } from "../utils.js";
+import { EVENT_TYPES } from '../const.js';
+import { getRandomArrayElement } from '../utils.js';
 
 const mockDestinations = [
   {
@@ -53,7 +53,7 @@ const mockDestinations = [
       }
     ]
   },
-]
+];
 
 const mockOffers = [
   {
@@ -164,47 +164,47 @@ const mockOffers = [
       },
     ]
   },
-]
+];
 
 const mockEvents = [
   {
     id: 'event1-id',
-    base_price: 200,
-    date_from: new Date('2025-07-8'),
-    date_to: new Date('2025-08-9'),
-    destination: mockDestinations[1],
+    basePrice: 200,
+    dateFrom: new Date('2025-07-8 10:54:00'),
+    dateTo: new Date('2025-08-9 11:32:00'),
+    destination: mockDestinations[0].name,
     isFavourite: true,
-    offers: mockOffers.find(offer => offer.type === getRandomArrayElement(EVENT_TYPES)),
+    offers: mockOffers[0].offers,
     type: getRandomArrayElement(EVENT_TYPES),
   },
   {
     id: 'event2-id',
-    base_price: 300,
-    date_from: new Date('2025-09-30'),
-    date_to: new Date('2025-11-22'),
-    destination: mockDestinations[2],
+    basePrice: 300,
+    dateFrom: new Date('2025-09-30: 04:00:00'),
+    dateTo: new Date('2025-11-22 07: 03:01'),
+    destination: mockDestinations[1].name,
     isFavourite: false,
-    offers: mockOffers.find(offer => offer.type === getRandomArrayElement(EVENT_TYPES)),
+    offers: mockOffers[1].offers,
     type: getRandomArrayElement(EVENT_TYPES),
   },
   {
     id: 'event3-id',
-    base_price: 400,
-    date_from: new Date('2026-01-01'),
-    date_to: new Date('2026-03-15'),
-    destination: mockDestinations[3],
+    basePrice: 400,
+    dateFrom: new Date('2026-01-01 08:30:00'),
+    dateTo: new Date('2026-03-15 18: 25:00'),
+    destination: mockDestinations[2].name,
     isFavourite: false,
-    offers: mockOffers.find(offer => offer.type === getRandomArrayElement(EVENT_TYPES)),
+    offers: mockOffers[2].offers,
     type: getRandomArrayElement(EVENT_TYPES),
   },
   {
     id: 'event4-id',
-    base_price: 5000,
-    date_from: new Date('2026-05-22'),
-    date_to: new Date('2026-06-14'),
-    destination: mockDestinations[4],
+    basePrice: 5000,
+    dateFrom: new Date('2026-05-22'),
+    dateTo: new Date('2026-06-14'),
+    destination: mockDestinations[3].name,
     isFavourite: true,
-    offers: mockOffers.find(offer => offer.type === getRandomArrayElement(EVENT_TYPES)),
+    offers: mockOffers[3].offers,
     type: getRandomArrayElement(EVENT_TYPES),
   },
 ];

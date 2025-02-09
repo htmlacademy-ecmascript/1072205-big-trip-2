@@ -19,7 +19,6 @@ export default class PagePresenter {
 
   init() {
     this.tripEvents = [...this.eventsModel.getEvents()];
-
     render(new TripInfoView(), tripMainElement, RenderPosition.AFTERBEGIN);
     render(new FiltersView(), filtersElement);
     render(new SortView(), tripEventElement);
