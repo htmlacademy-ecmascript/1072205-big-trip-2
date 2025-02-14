@@ -1,17 +1,28 @@
 import dayjs from 'dayjs';
 
-const DATE_FORMAT = 'MMM D';
 const TIME_FORMAT = 'HH:mm';
 const HOURS_IN_DAY = 24;
 const MINUTES_IN_HOURS = 60;
 
+function getRandomBoolean() {
+  const bool = Math.random() < 0.5;
+  return bool;
+}
+
+function getRandomNumber(maxNumber) {
+  return Math.floor(Math.random() * maxNumber);
+}
 
 function getRandomArrayElement(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
 
-function humanizeEventDate(eventDate) {
-  const date = eventDate ? dayjs(eventDate).format(DATE_FORMAT) : '';
+function getRandomDate(start = new Date(), end = new Date()) {
+  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+}
+
+function humanizeDate(eventDate, dateFormat) {
+  const date = eventDate ? dayjs(eventDate).format(dateFormat) : '';
   const time = eventDate ? dayjs(eventDate).format(TIME_FORMAT) : '';
   return {
     date: date,
@@ -35,5 +46,4 @@ function isEventFavourite(isFavourite) {
   return isFavourite ? 'event__favorite-btn--active' : '';
 }
 
-export { getRandomArrayElement, humanizeEventDate, eventDuration, isEventFavourite };
-
+export { getRandomArrayElement, humanizeDate, eventDuration, isEventFavourite, getRandomNumber, getRandomBoolean, getRandomDate };
