@@ -8,23 +8,29 @@ const siteMainElement = document.querySelector('.page-main');
 const tripEventElement = siteMainElement.querySelector('.trip-events');
 
 export default class EventsListPresenter {
+  tripEvents = null;
+  destinations = null;
+  offers = null;
+
   constructor(eventsModel) {
     this.eventsModel = eventsModel;
   }
 
   init() {
     this.tripEvents = [...this.eventsModel.getEvents()];
-    const destinations = this.eventsModel.getDestinations();
-    const offers = this.eventsModel.getOffers();
+    this.destinations = this.eventsModel.getDestinations();
+    this.offers = this.eventsModel.getOffers();
+  }
+
+  render() {
     render(new SortView(), tripEventElement);
     render(new EventListView(), tripEventElement);
 
     const tripEventsListElement = siteMainElement.querySelector('.trip-events__list');
-    render(new EventEditFormView({event: this.tripEvents, destinations, offers}), tripEventsListElement);
+    render(new EventEditFormView({event: this.tripEvents, destinations: this.destinations, offers: this.offers}), tripEventsListElement);
     for (let i = 1; i < this.tripEvents.length; i++) {
-      render(new EventView({event: this.tripEvents[i], destinations, offers}), tripEventsListElement);
+      render(new EventView({event: this.tripEvents[i],  destinations: this.destinations, offers: this.offers}), tripEventsListElement);
     }
-
   }
 }
 

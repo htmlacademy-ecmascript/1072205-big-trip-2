@@ -5,7 +5,7 @@ import { getMockTypeOffers } from '../mock/offers.js';
 const EVENT_COUNT = 4;
 
 export default class EventsModel {
-  events = Array.from({length: EVENT_COUNT + 1}, getMockEvent);
+  events = Array.from({length: EVENT_COUNT}, getMockEvent);
   destinations = getMockDestinations();
   offers = getMockTypeOffers();
 
