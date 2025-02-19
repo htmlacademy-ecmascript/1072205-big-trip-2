@@ -18,8 +18,8 @@ export default class EventsListPresenter {
 
   init() {
     this.tripEvents = [...this.eventsModel.getEvents()];
-    this.destinations = this.eventsModel.getDestinations();
-    this.offers = this.eventsModel.getOffers();
+    this.destinations = [...this.eventsModel.getDestinations()];
+    this.offers = [...this.eventsModel.getOffers()];
   }
 
   render() {
