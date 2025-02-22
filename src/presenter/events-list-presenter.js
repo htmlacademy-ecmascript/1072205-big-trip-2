@@ -8,18 +8,19 @@ const siteMainElement = document.querySelector('.page-main');
 const tripEventElement = siteMainElement.querySelector('.trip-events');
 
 export default class EventsListPresenter {
-  tripEvents = null;
-  destinations = null;
-  offers = null;
+  #eventsModel = null;
+  #tripEvents = [];
+  #destinations = [];
+  #offers = [];
 
   constructor(eventsModel) {
-    this.eventsModel = eventsModel;
+    this.#eventsModel = eventsModel;
   }
 
   init() {
-    this.tripEvents = [...this.eventsModel.getEvents()];
-    this.destinations = [...this.eventsModel.getDestinations()];
-    this.offers = [...this.eventsModel.getOffers()];
+    this.#tripEvents = [...this.#eventsModel.events];
+    this.#destinations = [...this.#eventsModel.destinations];
+    this.#offers = [...this.#eventsModel.offers];
   }
 
   render() {
@@ -27,9 +28,9 @@ export default class EventsListPresenter {
     render(new EventListView(), tripEventElement);
 
     const tripEventsListElement = siteMainElement.querySelector('.trip-events__list');
-    render(new EventEditFormView({event: this.tripEvents, destinations: this.destinations, offers: this.offers}), tripEventsListElement);
-    for (let i = 1; i < this.tripEvents.length; i++) {
-      render(new EventView({event: this.tripEvents[i],  destinations: this.destinations, offers: this.offers}), tripEventsListElement);
+    render(new EventEditFormView({event: this.#tripEvents, destinations: this.#destinations, offers: this.#offers}), tripEventsListElement);
+    for (let i = 1; i < this.#tripEvents.length; i++) {
+      render(new EventView({event: this.#tripEvents[i],  destinations: this.#destinations, offers: this.#offers}), tripEventsListElement);
     }
   }
 }
