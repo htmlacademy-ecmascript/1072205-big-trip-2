@@ -27,11 +27,17 @@ export default class EventsListPresenter {
     render(new SortView(), tripEventElement);
     render(new EventListView(), tripEventElement);
 
-    const tripEventsListElement = siteMainElement.querySelector('.trip-events__list');
-    render(new EventEditFormView({event: this.#tripEvents, destinations: this.#destinations, offers: this.#offers}), tripEventsListElement);
     for (let i = 1; i < this.#tripEvents.length; i++) {
-      render(new EventView({event: this.#tripEvents[i],  destinations: this.#destinations, offers: this.#offers}), tripEventsListElement);
+      this.#renderEvent(this.#tripEvents[i], this.#destinations, this.#offers);
     }
+  }
+
+  #renderEvent(event, destinations, offers) {
+    const tripEventsListElement = siteMainElement.querySelector('.trip-events__list');
+    const eventsComponent = new EventView({event, destinations, offers});
+
+    //render(new EventEditFormView({event: this.#tripEvents, destinations: this.#destinations, offers: this.#offers}), tripEventsListElement);
+    render(eventsComponent, tripEventsListElement)
   }
 }
 
