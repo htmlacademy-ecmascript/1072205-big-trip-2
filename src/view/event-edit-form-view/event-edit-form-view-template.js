@@ -42,7 +42,8 @@ function createDestinationPhotoTemplate(destinationById) {
 }
 
 function createEventEditFormTemplate(event, destinations, offersList) {
-  const {basePrice, dateFrom, dateTo, destination, offers, type} = event[0];
+  console.log(event);
+  const {basePrice, dateFrom, dateTo, destination, offers, type} = event;
   const startTime = `${humanizeDate(dateFrom, EDIT_FORM_DATE_FORMAT).date} ${humanizeDate(dateFrom).time}`;
   const endTime = humanizeDate(dateTo, EDIT_FORM_DATE_FORMAT).date + humanizeDate(dateTo).time;
   const destinationById = destinations.find((dest) => dest.id === destination);

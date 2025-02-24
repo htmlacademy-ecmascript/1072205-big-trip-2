@@ -1,4 +1,4 @@
-import { render } from '../framework/render.js';
+import { render, replace } from '../framework/render.js';
 import SortView from '../view/sort-view.js';
 import EventListView from '../view/event-list-view.js';
 import EventView from '../view/event-view/event-view.js';
@@ -34,10 +34,42 @@ export default class EventsListPresenter {
 
   #renderEvent(event, destinations, offers) {
     const tripEventsListElement = siteMainElement.querySelector('.trip-events__list');
-    const eventsComponent = new EventView({event, destinations, offers});
+    const escKeyDownHandler = (evt) => {
+      if (evt.key === 'Escape') {
+        evt.preventDefault();
+        replaceFormToItem();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+    };
+    const eventComponent = new EventView({
+      event,
+      destinations,
+      offers,
+      onEditClick: () => {
+        replaceItemToForm();
+        document.addEventListener('keydown', escKeyDownHandler);
+      }
+    });
+    const eventEditFormComponent = new EventEditFormView({
+      event,
+      destinations,
+      offers,
+      onFormSubmit: () => {
+        replaceFormToItem();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+    });
+
+    function replaceItemToForm() {
+      replace(eventEditFormComponent, eventComponent);
+    }
+
+    function replaceFormToItem() {
+      replace(eventComponent, eventEditFormComponent);
+    }
 
     //render(new EventEditFormView({event: this.#tripEvents, destinations: this.#destinations, offers: this.#offers}), tripEventsListElement);
-    render(eventsComponent, tripEventsListElement)
+    render(eventComponent, tripEventsListElement)
   }
 }
 
