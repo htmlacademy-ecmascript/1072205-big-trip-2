@@ -1,4 +1,4 @@
-import { humanizeDate } from '../../utils.js';
+import { humanizeDate } from '../../utils/event';
 
 const EDIT_FORM_DATE_FORMAT = 'DD/MM/YY';
 
@@ -42,7 +42,6 @@ function createDestinationPhotoTemplate(destinationById) {
 }
 
 function createEventEditFormTemplate(event, destinations, offersList) {
-  console.log(event);
   const {basePrice, dateFrom, dateTo, destination, offers, type} = event;
   const startTime = `${humanizeDate(dateFrom, EDIT_FORM_DATE_FORMAT).date} ${humanizeDate(dateFrom).time}`;
   const endTime = humanizeDate(dateTo, EDIT_FORM_DATE_FORMAT).date + humanizeDate(dateTo).time;
@@ -140,6 +139,9 @@ function createEventEditFormTemplate(event, destinations, offersList) {
 
           <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
           <button class="event__reset-btn" type="reset">Cancel</button>
+          <button class="event__rollup-btn" type="button">
+            <span class="visually-hidden">Open event</span>
+          </button>
         </header>
         <section class="event__details">
           ${createOffersContainerTemplate(offers, offersByType)}

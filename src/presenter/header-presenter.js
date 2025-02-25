@@ -7,6 +7,7 @@ const filtersElement = tripMainElement.querySelector('.trip-controls__filters');
 
 export default class HeaderPresenter {
   init() {
+
     render(new TripInfoView(), tripMainElement, RenderPosition.AFTERBEGIN);
     render(new FiltersView(), filtersElement);
   }

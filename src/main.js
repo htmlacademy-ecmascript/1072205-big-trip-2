@@ -8,4 +8,3 @@ const eventsListPresenter = new EventsListPresenter(eventsModel);
 
 headerPresenter.init();
 eventsListPresenter.init();
-eventsListPresenter.render();
