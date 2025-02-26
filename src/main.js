@@ -1,10 +1,10 @@
 import EventsModel from './model/events-model.js';
-import HeaderPresenter from './presenter/header-presenter.js';
+import PagePresenter from './presenter/page-presenter.js';
 import EventsListPresenter from './presenter/events-list-presenter.js';
 
 const eventsModel = new EventsModel();
-const headerPresenter = new HeaderPresenter();
+const pagePresenter = new PagePresenter(eventsModel);
 const eventsListPresenter = new EventsListPresenter(eventsModel);
 
-headerPresenter.init();
+pagePresenter.init();
 eventsListPresenter.init();
