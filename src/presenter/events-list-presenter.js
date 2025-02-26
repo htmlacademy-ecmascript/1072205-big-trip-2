@@ -1,30 +1,85 @@
-import { render } from '../render.js';
+import { render, replace } from '../framework/render.js';
 import SortView from '../view/sort-view.js';
 import EventListView from '../view/event-list-view.js';
 import EventView from '../view/event-view/event-view.js';
 import EventEditFormView from '../view/event-edit-form-view/event-edit-form-view.js';
+import NoEventView from '../view/no-event-view.js';
 
 const siteMainElement = document.querySelector('.page-main');
 const tripEventElement = siteMainElement.querySelector('.trip-events');
 
 export default class EventsListPresenter {
+  #eventsModel = null;
+  #tripEvents = [];
+  #destinations = [];
+  #offers = [];
+
   constructor(eventsModel) {
-    this.eventsModel = eventsModel;
+    this.#eventsModel = eventsModel;
   }
 
   init() {
-    this.tripEvents = [...this.eventsModel.getEvents()];
-    const destinations = this.eventsModel.getDestinations();
-    const offers = this.eventsModel.getOffers();
-    render(new SortView(), tripEventElement);
-    render(new EventListView(), tripEventElement);
+    this.#tripEvents = [...this.#eventsModel.events];
+    this.#destinations = [...this.#eventsModel.destinations];
+    this.#offers = [...this.#eventsModel.offers];
 
-    const tripEventsListElement = siteMainElement.querySelector('.trip-events__list');
-    render(new EventEditFormView({event: this.tripEvents, destinations, offers}), tripEventsListElement);
-    for (let i = 1; i < this.tripEvents.length; i++) {
-      render(new EventView({event: this.tripEvents[i], destinations, offers}), tripEventsListElement);
+    this.#renderEventList();
+  }
+
+  #renderEventList() {
+    if (this.#tripEvents.length === 0) {
+      render(new NoEventView(), tripEventElement);
+      return;
     }
 
+    render(new SortView(), tripEventElement);
+    render(new EventListView(), tripEventElement);
+    for (let i = 1; i < this.#tripEvents.length; i++) {
+      this.#renderEvent(this.#tripEvents[i], this.#destinations, this.#offers);
+    }
+  }
+
+  #renderEvent(event, destinations, offers) {
+    const tripEventsListElement = siteMainElement.querySelector('.trip-events__list');
+    const escKeyDownHandler = (evt) => {
+      if (evt.key === 'Escape') {
+        evt.preventDefault();
+        replaceFormToItem();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+    };
+    const eventComponent = new EventView({
+      event,
+      destinations,
+      offers,
+      onEditClick: () => {
+        replaceItemToForm();
+        document.addEventListener('keydown', escKeyDownHandler);
+      }
+    });
+    const eventEditFormComponent = new EventEditFormView({
+      event,
+      destinations,
+      offers,
+      onFormSubmit: () => {
+        replaceFormToItem();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      },
+      onEditClick: () => {
+        replaceFormToItem();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+    });
+
+    function replaceItemToForm() {
+      replace(eventEditFormComponent, eventComponent);
+    }
+
+    function replaceFormToItem() {
+      replace(eventComponent, eventEditFormComponent);
+    }
+
+    render(eventComponent, tripEventsListElement)
   }
 }
 

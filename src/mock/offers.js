@@ -1,5 +1,5 @@
 import { EVENT_TYPES, OFFERS } from '../const.js';
-import { getRandomNumber } from '../utils.js';
+import { getRandomNumber } from '../utils/common.js';
 
 function getMockOffer() {
   const randomIndex = getRandomNumber(OFFERS.length);

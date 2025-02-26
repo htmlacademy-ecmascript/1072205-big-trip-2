@@ -1,5 +1,5 @@
 import { DESTINATIONS, DESCRIPTIONS, PICTURE_URL } from '../const';
-import { getRandomArrayElement, getRandomNumber } from '../utils';
+import { getRandomArrayElement, getRandomNumber } from '../utils/common';
 
 const PICTURES_MAX_COUNT = 10;
 

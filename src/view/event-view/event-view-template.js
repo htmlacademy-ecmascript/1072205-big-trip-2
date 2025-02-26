@@ -1,4 +1,4 @@
-import { humanizeDate, eventDuration, isEventFavourite } from '../../utils.js';
+import { humanizeDate, eventDuration, isEventFavourite } from '../../utils/event';
 
 const EVENT_DATE_FORMAT = 'MMM DD';
 

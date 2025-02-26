@@ -4,23 +4,6 @@ const TIME_FORMAT = 'HH:mm';
 const HOURS_IN_DAY = 24;
 const MINUTES_IN_HOURS = 60;
 
-function getRandomBoolean() {
-  const bool = Math.random() < 0.5;
-  return bool;
-}
-
-function getRandomNumber(maxNumber) {
-  return Math.floor(Math.random() * maxNumber);
-}
-
-function getRandomArrayElement(items) {
-  return items[Math.floor(Math.random() * items.length)];
-}
-
-function getRandomDate(start = new Date(), end = new Date()) {
-  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-}
-
 function humanizeDate(eventDate, dateFormat) {
   const date = eventDate ? dayjs(eventDate).format(dateFormat) : '';
   const time = eventDate ? dayjs(eventDate).format(TIME_FORMAT) : '';
@@ -46,4 +29,4 @@ function isEventFavourite(isFavourite) {
   return isFavourite ? 'event__favorite-btn--active' : '';
 }
 
-export { getRandomArrayElement, humanizeDate, eventDuration, isEventFavourite, getRandomNumber, getRandomBoolean, getRandomDate };
+export { humanizeDate, eventDuration, isEventFavourite };

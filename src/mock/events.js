@@ -1,5 +1,5 @@
 import { EVENT_TYPES, DESTINATIONS, OFFERS } from '../const.js';
-import { getRandomArrayElement, getRandomNumber, getRandomBoolean, getRandomDate } from '../utils.js';
+import { getRandomArrayElement, getRandomNumber, getRandomBoolean, getRandomDate } from '../utils/common.js';
 import { getMockOffer } from './offers.js';
 
 function getMockEvent() {
