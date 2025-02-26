@@ -26,7 +26,7 @@ export default class EventsListPresenter {
 
   #renderEventList() {
     render(new EventListView(), tripEventElement);
-    for (let i = 1; i < this.#tripEvents.length; i++) {
+    for (let i = 0; i < this.#tripEvents.length; i++) {
       this.#renderEvent(this.#tripEvents[i], this.#destinations, this.#offers);
     }
   }
