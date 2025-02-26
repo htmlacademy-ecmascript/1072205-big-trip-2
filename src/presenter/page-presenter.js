@@ -11,23 +11,25 @@ const tripMainElement = document.querySelector('.trip-main');
 const filtersElement = tripMainElement.querySelector('.trip-controls__filters');
 
 export default class PagePresenter {
-  #tripEvents = [];
-  #eventsModel = null;
+  #events = [];
+  #destinations = [];
+  #eventsModel = [];
 
   constructor(eventsModel) {
     this.#eventsModel = eventsModel;
   }
 
   init() {
-    this.#tripEvents = [...this.#eventsModel.events];
+    this.#events = [...this.#eventsModel.events];
+    this.#destinations = [...this.#eventsModel.destinations];
     const filters = generateFilter(this.#eventsModel.events);
 
     render(new FiltersView({filters}), filtersElement);
-    if (this.#tripEvents.length === 0) {
+    if (this.#events.length === 0) {
       render(new NoEventView(), tripEventElement);
       return;
     }
-    render(new TripInfoView(), tripMainElement, RenderPosition.AFTERBEGIN);
+    render(new TripInfoView({events: this.#events, destinations: this.#destinations}), tripMainElement, RenderPosition.AFTERBEGIN);
     render(new SortView(), tripEventElement);
   }
 }
