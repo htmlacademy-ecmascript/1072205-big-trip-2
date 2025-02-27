@@ -3,8 +3,8 @@ import { createEventTemplate } from './event-view-template.js';
 
 export default class EventView extends AbstractView {
   #event = null;
-  #destinations = null;
-  #offers = null;
+  #destinations = [];
+  #offers = [];
   #handleEditClick = null;
 
   constructor({event, destinations, offers, onEditClick}) {

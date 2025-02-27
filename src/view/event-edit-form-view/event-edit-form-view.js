@@ -15,8 +15,8 @@ const BLANK_EVENT = {
 
 export default class EventEditFormView extends AbstractView {
   #event = null;
-  #destinations = null;
-  #offers = null;
+  #destinations = [];
+  #offers = [];
   #handleFormSubmit = null;
   #handleEditClick = null;
 
@@ -27,12 +27,16 @@ export default class EventEditFormView extends AbstractView {
     this.#offers = offers;
     this.#handleFormSubmit = onFormSubmit;
     this.#handleEditClick = onEditClick;
-    this.element.querySelector('.event--edit').addEventListener('submit', this.#formSubmitHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
+    this.#registerEvents();
   }
 
   get template() {
     return createEventEditFormTemplate(this.#event, this.#destinations, this.#offers);
+  }
+
+  #registerEvents() {
+    this.element.querySelector('.event--edit').addEventListener('submit', this.#formSubmitHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
   }
 
   #formSubmitHandler = (evt) => {

@@ -1,18 +1,19 @@
 import { render, replace } from '../framework/render.js';
-import SortView from '../view/sort-view.js';
 import EventListView from '../view/event-list-view.js';
 import EventView from '../view/event-view/event-view.js';
 import EventEditFormView from '../view/event-edit-form-view/event-edit-form-view.js';
-import NoEventView from '../view/no-event-view.js';
 
 const siteMainElement = document.querySelector('.page-main');
 const tripEventElement = siteMainElement.querySelector('.trip-events');
 
+const isEscape = (evt) => evt.key === 'Escape';
+
 export default class EventsListPresenter {
-  #eventsModel = null;
+  #eventsModel;
   #tripEvents = [];
   #destinations = [];
   #offers = [];
+  #eventListComponent = new EventListView();
 
   constructor(eventsModel) {
     this.#eventsModel = eventsModel;
@@ -27,59 +28,45 @@ export default class EventsListPresenter {
   }
 
   #renderEventList() {
-    if (this.#tripEvents.length === 0) {
-      render(new NoEventView(), tripEventElement);
-      return;
-    }
-
-    render(new SortView(), tripEventElement);
-    render(new EventListView(), tripEventElement);
-    for (let i = 1; i < this.#tripEvents.length; i++) {
-      this.#renderEvent(this.#tripEvents[i], this.#destinations, this.#offers);
-    }
+    render(this.#eventListComponent, tripEventElement);
+    this.#tripEvents.forEach((event) => this.#renderEvent(event));
   }
 
-  #renderEvent(event, destinations, offers) {
+  #renderEvent(event) {
     const tripEventsListElement = siteMainElement.querySelector('.trip-events__list');
-    const escKeyDownHandler = (evt) => {
-      if (evt.key === 'Escape') {
-        evt.preventDefault();
-        replaceFormToItem();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
-    };
+
     const eventComponent = new EventView({
       event,
-      destinations,
-      offers,
-      onEditClick: () => {
-        replaceItemToForm();
-        document.addEventListener('keydown', escKeyDownHandler);
-      }
+      destinations: this.#destinations,
+      offers: this.#offers,
+      onEditClick: () => this.#replaceItemToForm(eventComponent, event)
     });
+
+    render(eventComponent, tripEventsListElement);
+  }
+
+  #replaceItemToForm(eventComponent, event) {
     const eventEditFormComponent = new EventEditFormView({
       event,
-      destinations,
-      offers,
-      onFormSubmit: () => {
-        replaceFormToItem();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      },
-      onEditClick: () => {
-        replaceFormToItem();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
+      destinations: this.#destinations,
+      offers: this.#offers,
+      onFormSubmit: () => this.#replaceFormToItem(eventComponent, eventEditFormComponent),
+      onEditClick: () => this.#replaceFormToItem(eventComponent, eventEditFormComponent)
     });
 
-    function replaceItemToForm() {
-      replace(eventEditFormComponent, eventComponent);
-    }
+    replace(eventEditFormComponent, eventComponent);
+    document.addEventListener('keydown', (evt) => this.#escKeyDownHandler(evt, eventComponent, eventEditFormComponent));
+  }
 
-    function replaceFormToItem() {
-      replace(eventComponent, eventEditFormComponent);
-    }
+  #replaceFormToItem(eventComponent, eventEditFormComponent) {
+    replace(eventComponent, eventEditFormComponent);
+    document.removeEventListener('keydown', (evt) => this.#escKeyDownHandler(evt, eventComponent, eventEditFormComponent));
+  }
 
-    render(eventComponent, tripEventsListElement)
+  #escKeyDownHandler(evt, eventComponent, eventEditFormComponent) {
+    if (isEscape(evt)) {
+      evt.preventDefault();
+      this.#replaceFormToItem(eventComponent, eventEditFormComponent);
+    }
   }
 }
-

@@ -24,5 +24,11 @@ const DESCRIPTIONS = [
   'In rutrum ac purus sit amet tempus.'
 ];
 const PICTURE_URL = 'https://loremflickr.com/248/152?random=';
+const FilterType = {
+  EVERYTHING: 'everything',
+  FUTURE: 'future',
+  PRESENT: 'present',
+  PAST: 'past',
+};
 
-export { EVENT_TYPES, OFFERS, DESTINATIONS, DESCRIPTIONS, PICTURE_URL };
+export { EVENT_TYPES, OFFERS, DESTINATIONS, DESCRIPTIONS, PICTURE_URL, FilterType };
