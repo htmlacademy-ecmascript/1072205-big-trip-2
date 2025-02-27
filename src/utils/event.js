@@ -26,7 +26,7 @@ function eventDuration(startTime, endTime) {
 }
 
 function isEventFavourite(isFavourite) {
-  return isFavourite ? 'event__favorite-btn--active' : '';
+  return isFavourite && 'event__favorite-btn--active';
 }
 
 export { humanizeDate, eventDuration, isEventFavourite };

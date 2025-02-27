@@ -3,33 +3,41 @@ import TripInfoView from '../view/trip-info-view.js';
 import FiltersView from '../view/filters-view.js';
 import SortView from '../view/sort-view.js';
 import NoEventView from '../view/no-event-view.js';
-import { generateFilter } from '../mock/filter.js';
-
-const siteMainElement = document.querySelector('.page-main');
-const tripEventElement = siteMainElement.querySelector('.trip-events');
-const tripMainElement = document.querySelector('.trip-main');
-const filtersElement = tripMainElement.querySelector('.trip-controls__filters');
+import { generateFilter } from '../utils/filters.js';
 
 export default class PagePresenter {
+  #eventsModel = null;
   #events = [];
   #destinations = [];
-  #eventsModel = [];
+
+  #tripMainElement = null;
+  #tripEventElement = null;
+  #filtersElement = null;
 
   constructor(eventsModel) {
     this.#eventsModel = eventsModel;
   }
 
   init() {
-    this.#events = [...this.#eventsModel.events];
-    this.#destinations = [...this.#eventsModel.destinations];
-    const filters = generateFilter(this.#eventsModel.events);
+    this.#events = this.#eventsModel.events;
+    this.#destinations = this.#eventsModel.destinations;
 
-    render(new FiltersView({filters}), filtersElement);
+    this.#tripMainElement = document.querySelector('.trip-main');
+    this.#tripEventElement = document.querySelector('.page-main .trip-events');
+    this.#filtersElement = this.#tripMainElement.querySelector('.trip-controls__filters');
+
+    this.#renderComponents();
+  }
+
+  #renderComponents() {
+    render(new FiltersView({ filters: generateFilter(this.#events) }), this.#filtersElement);
+
     if (this.#events.length === 0) {
-      render(new NoEventView(), tripEventElement);
+      render(new NoEventView(), this.#tripEventElement);
       return;
     }
-    render(new TripInfoView({events: this.#events, destinations: this.#destinations}), tripMainElement, RenderPosition.AFTERBEGIN);
-    render(new SortView(), tripEventElement);
+
+    render(new TripInfoView({ events: this.#events, destinations: this.#destinations }), this.#tripMainElement, RenderPosition.AFTERBEGIN);
+    render(new SortView(), this.#tripEventElement);
   }
 }

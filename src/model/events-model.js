@@ -5,7 +5,7 @@ import { getMockTypeOffers } from '../mock/offers.js';
 const EVENT_COUNT = 4;
 
 export default class EventsModel {
-  #events = Array.from({length: EVENT_COUNT}, getMockEvent);
+  #events = Array.from({ length: EVENT_COUNT }, getMockEvent);
   #destinations = getMockDestinations();
   #offers = getMockTypeOffers();
 
@@ -13,11 +13,23 @@ export default class EventsModel {
     return this.#events;
   }
 
+  set events(newEvents) {
+    this.#events = newEvents;
+  }
+
   get destinations() {
     return this.#destinations;
   }
 
+  set destinations(newDestinations) {
+    this.#destinations = newDestinations;
+  }
+
   get offers() {
     return this.#offers;
+  }
+
+  set offers(newOffers) {
+    this.#offers = newOffers;
   }
 }

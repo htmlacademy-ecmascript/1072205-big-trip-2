@@ -1,4 +1,4 @@
-import AbstractView from "../framework/view/abstract-view";
+import AbstractView from '../framework/view/abstract-view';
 
 function createFilterItemTemplate(filter, isChecked) {
   const {type, count} = filter;
@@ -17,7 +17,7 @@ function createFiltersTemplate(filterItems) {
 
   return (
     `<form class="trip-filters" action="#" method="get">
-    ${filterItemsTemplate}
+      ${filterItemsTemplate}
       <button class="visually-hidden" type="submit">Accept filter</button>
     </form>`
   );
