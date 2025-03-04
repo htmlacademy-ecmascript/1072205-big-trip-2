@@ -15,4 +15,8 @@ function getRandomDate(start = new Date(), end = new Date()) {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
 
-export { getRandomArrayElement, getRandomNumber, getRandomBoolean, getRandomDate };
+function isEscape(evt) {
+  return evt.key === 'Escape';
+}
+
+export { getRandomArrayElement, getRandomNumber, getRandomBoolean, getRandomDate, isEscape };

@@ -1,48 +1,27 @@
 import { render, replace } from '../framework/render.js';
-import EventListView from '../view/event-list-view.js';
+import { isEscape } from '../utils/common.js';
 import EventView from '../view/event-view/event-view.js';
 import EventEditFormView from '../view/event-edit-form-view/event-edit-form-view.js';
 
-const siteMainElement = document.querySelector('.page-main');
-const tripEventElement = siteMainElement.querySelector('.trip-events');
 
-const isEscape = (evt) => evt.key === 'Escape';
+export default class EventPresenter {
+   #tripEventsListElement = null;
+   #destinations = [];
+   #offers = [];
 
-export default class EventsListPresenter {
-  #eventsModel;
-  #tripEvents = [];
-  #destinations = [];
-  #offers = [];
-  #eventListComponent = new EventListView();
-
-  constructor(eventsModel) {
-    this.#eventsModel = eventsModel;
-  }
-
-  init() {
-    this.#tripEvents = [...this.#eventsModel.events];
-    this.#destinations = [...this.#eventsModel.destinations];
-    this.#offers = [...this.#eventsModel.offers];
-
-    this.#renderEventList();
-  }
-
-  #renderEventList() {
-    render(this.#eventListComponent, tripEventElement);
-    this.#tripEvents.forEach((event) => this.#renderEvent(event));
-  }
-
-  #renderEvent(event) {
-    const tripEventsListElement = siteMainElement.querySelector('.trip-events__list');
+  renderEvent(event, destinations, offers) {
+    this.#tripEventsListElement = document.querySelector('.trip-events__list');
+    this.#destinations = destinations;
+    this.#offers = offers;
 
     const eventComponent = new EventView({
-      event,
-      destinations: this.#destinations,
-      offers: this.#offers,
+      event: event,
+      destinations: destinations,
+      offers: offers,
       onEditClick: () => this.#replaceItemToForm(eventComponent, event)
     });
 
-    render(eventComponent, tripEventsListElement);
+    render(eventComponent, this.#tripEventsListElement);
   }
 
   #replaceItemToForm(eventComponent, event) {
