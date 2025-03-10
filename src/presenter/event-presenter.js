@@ -1,51 +1,94 @@
-import { render, replace } from '../framework/render.js';
+import { render, replace, remove } from '../framework/render.js';
 import { isEscape } from '../utils/common.js';
-import EventView from '../view/event-view/event-view.js';
 import EventEditFormView from '../view/event-edit-form-view/event-edit-form-view.js';
-
+import EventView from '../view/event-view/event-view.js';
 
 export default class EventPresenter {
-   #tripEventsListElement = null;
-   #destinations = [];
-   #offers = [];
+  #tripEventsListElement = null;
+  #event = null;
+  #destinations = [];
+  #offers = [];
 
-  renderEvent(event, destinations, offers) {
-    this.#tripEventsListElement = document.querySelector('.trip-events__list');
+  #eventComponent = null;
+  #eventEditFormComponent = null;
+
+  #onDataChange = null;
+  #handleFavoriteClick = null;
+
+  constructor(container) {
+    this.#tripEventsListElement = container;
+  }
+
+  init(event, destinations, offers, onDataChange) {
+    if (!this.#tripEventsListElement) {
+      this.#tripEventsListElement = document.querySelector('.trip-events__list');
+    }
+
     this.#destinations = destinations;
     this.#offers = offers;
+    this.#onDataChange = onDataChange;
+    this.#event = event;
 
-    const eventComponent = new EventView({
-      event: event,
-      destinations: destinations,
-      offers: offers,
-      onEditClick: () => this.#replaceItemToForm(eventComponent, event)
-    });
+    const prevEventComponent = this.#eventComponent;
+    const prevEventEditComponent = this.#eventEditFormComponent;
 
-    render(eventComponent, this.#tripEventsListElement);
-  }
-
-  #replaceItemToForm(eventComponent, event) {
-    const eventEditFormComponent = new EventEditFormView({
+    this.#eventComponent = new EventView({
       event,
-      destinations: this.#destinations,
-      offers: this.#offers,
-      onFormSubmit: () => this.#replaceFormToItem(eventComponent, eventEditFormComponent),
-      onEditClick: () => this.#replaceFormToItem(eventComponent, eventEditFormComponent)
+      destinations,
+      offers,
+      onEditClick: () => this.#replaceItemToForm(),
+      onFavoriteClick: this.handleFavoriteClick
     });
 
-    replace(eventEditFormComponent, eventComponent);
-    document.addEventListener('keydown', (evt) => this.#escKeyDownHandler(evt, eventComponent, eventEditFormComponent));
+    this.#eventEditFormComponent = new EventEditFormView({
+      event,
+      destinations,
+      offers,
+      onFormSubmit: () => this.#replaceFormToItem(),
+      onEditClick: () => this.#replaceFormToItem()
+    });
+
+    if (prevEventComponent && prevEventEditComponent) {
+      replace(this.#eventComponent, prevEventComponent);
+      replace(this.#eventEditFormComponent, prevEventEditComponent);
+      remove(prevEventComponent);
+      remove(prevEventEditComponent);
+      return;
+    }
+
+    render(this.#eventComponent, this.#tripEventsListElement);
   }
 
-  #replaceFormToItem(eventComponent, eventEditFormComponent) {
-    replace(eventComponent, eventEditFormComponent);
-    document.removeEventListener('keydown', (evt) => this.#escKeyDownHandler(evt, eventComponent, eventEditFormComponent));
+  destroy() {
+    remove(this.#eventComponent);
+    remove(this.#eventEditFormComponent);
   }
 
-  #escKeyDownHandler(evt, eventComponent, eventEditFormComponent) {
+  handleFavoriteClick = () => {
+    const updatedEvent = { ...this.#event, isFavorite: !this.#event.isFavorite };
+    this.#onDataChange(updatedEvent);
+    this.#eventComponent.updateFavoriteButton(updatedEvent.isFavorite);
+  };
+
+  update(updatedEvent) {
+    this.#event = updatedEvent;
+    this.#eventComponent.updateFavoriteButton(updatedEvent.isFavorite);
+  }
+
+  #replaceItemToForm() {
+    replace(this.#eventEditFormComponent, this.#eventComponent);
+    document.addEventListener('keydown', this.#escKeyDownHandler);
+  }
+
+  #replaceFormToItem() {
+    replace(this.#eventComponent, this.#eventEditFormComponent);
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
+  }
+
+  #escKeyDownHandler = (evt) => {
     if (isEscape(evt)) {
       evt.preventDefault();
-      this.#replaceFormToItem(eventComponent, eventEditFormComponent);
+      this.#replaceFormToItem();
     }
-  }
+  };
 }

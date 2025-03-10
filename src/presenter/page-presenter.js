@@ -1,10 +1,11 @@
 import { render, RenderPosition } from '../framework/render.js';
 import { generateFilter } from '../utils/filters.js';
-import TripInfoView from '../view/trip-info-view.js';
-import FiltersView from '../view/filters-view.js';
-import SortView from '../view/sort-view.js';
-import NoEventView from '../view/no-event-view.js';
+import { updateItem } from '../utils/common.js';
 import EventListView from '../view/event-list-view.js';
+import FiltersView from '../view/filters-view.js';
+import NoEventView from '../view/no-event-view.js';
+import SortView from '../view/sort-view.js';
+import TripInfoView from '../view/trip-info-view.js';
 import EventPresenter from './event-presenter.js';
 
 export default class PagePresenter {
@@ -12,8 +13,8 @@ export default class PagePresenter {
   #events = [];
   #destinations = [];
   #offers = [];
+  #eventPresenters = new Map();
 
-  #eventComponent = new EventPresenter();
   #eventListComponent = new EventListView();
 
   #tripMainElement = null;
@@ -36,11 +37,12 @@ export default class PagePresenter {
     this.#renderFilters();
     if (this.#events.length === 0) {
       this.#renderNoEvent();
-    } else {
-      this.#renderTripInfo();
-      this.#renderSort();
-      this.#renderEventList();
+      return;
     }
+
+    this.#renderTripInfo();
+    this.#renderSort();
+    this.#renderEventList();
   }
 
   #renderFilters() {
@@ -63,6 +65,20 @@ export default class PagePresenter {
 
   #renderEventList() {
     render(this.#eventListComponent, this.#tripEventElement);
-    this.#events.forEach((event) => this.#eventComponent.renderEvent(event, this.#destinations, this.#offers));
+    this.#events.forEach((event) => {
+      const eventPresenter = new EventPresenter(this.#tripEventElement.querySelector('.trip-events__list'));
+      eventPresenter.init(event, this.#destinations, this.#offers, this.#onEventChange);
+      this.#eventPresenters.set(event.id, eventPresenter);
+    });
   }
+
+  #onEventChange = (updatedEvent) => {
+    this.#events = updateItem(this.#events, updatedEvent);
+    this.#eventPresenters.get(updatedEvent.id).update(updatedEvent);
+  };
+
+  updateEvent(updatedEvent) {
+    this.#events = this.#events.map((event) => event.id === updatedEvent.id ? updatedEvent : event);
+    this.#eventPresenters.get(updatedEvent.id).update(updatedEvent);
+  };
 }
