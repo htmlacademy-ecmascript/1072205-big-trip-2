@@ -32,7 +32,9 @@ export default class EventView extends AbstractView {
   #onFavoriteButtonClick = (evt) => {
     evt.preventDefault();
     this.#event.isFavorite = !this.#event.isFavorite;
-    this.#handleFavoriteClick(this.#event.isFavorite);
+    if (typeof this.#handleFavoriteClick === 'function') {
+      this.#handleFavoriteClick(!this.#event.isFavorite);
+    }
     this.updateFavoriteButton(this.#event.isFavorite);
   };
 
