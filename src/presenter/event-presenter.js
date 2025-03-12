@@ -50,6 +50,7 @@ export default class EventPresenter {
       onEditClick: () => {
         this.#onResetView(); // Закрываем все открытые формы перед открытием новой
         this.#replaceItemToForm();
+        this.#replaceFormToItem();
       },
     });
 
