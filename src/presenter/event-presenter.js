@@ -13,13 +13,14 @@ export default class EventPresenter {
   #eventEditFormComponent = null;
 
   #onDataChange = null;
+  #onResetView = null;
   #handleFavoriteClick = null;
 
   constructor(container) {
     this.#tripEventsListElement = container;
   }
 
-  init(event, destinations, offers, onDataChange) {
+  init(event, destinations, offers, onDataChange, onResetView) {
     if (!this.#tripEventsListElement) {
       this.#tripEventsListElement = document.querySelector('.trip-events__list');
     }
@@ -27,6 +28,7 @@ export default class EventPresenter {
     this.#destinations = destinations;
     this.#offers = offers;
     this.#onDataChange = onDataChange;
+    this.#onResetView = onResetView; // Сохраняем ссылку на метод сброса вида
     this.#event = event;
 
     const prevEventComponent = this.#eventComponent;
@@ -36,8 +38,8 @@ export default class EventPresenter {
       event,
       destinations,
       offers,
-      onEditClick: () => this.#replaceItemToForm(),
-      onFavoriteClick: this.handleFavoriteClick
+      onEditClick: this.#handleEditClick, // Теперь вызываем метод-обработчик
+      onFavoriteClick: this.#handleFavoriteClick
     });
 
     this.#eventEditFormComponent = new EventEditFormView({
@@ -45,7 +47,10 @@ export default class EventPresenter {
       destinations,
       offers,
       onFormSubmit: () => this.#replaceFormToItem(),
-      onEditClick: () => this.#replaceFormToItem()
+      onEditClick: () => {
+        this.#onResetView(); // Закрываем все открытые формы перед открытием новой
+        this.#replaceItemToForm();
+      },
     });
 
     if (prevEventComponent && prevEventEditComponent) {
@@ -74,6 +79,17 @@ export default class EventPresenter {
     this.#event = updatedEvent;
     this.#eventComponent.updateFavoriteButton(updatedEvent.isFavorite);
   }
+
+  resetView() {
+    if (this.#tripEventsListElement.contains(this.#eventEditFormComponent.element)) {
+      this.#replaceFormToItem();
+    }
+  }
+
+  #handleEditClick = () => {
+    this.#onResetView();
+    this.#replaceItemToForm();
+  };
 
   #replaceItemToForm() {
     replace(this.#eventEditFormComponent, this.#eventComponent);

@@ -67,7 +67,7 @@ export default class PagePresenter {
     render(this.#eventListComponent, this.#tripEventElement);
     this.#events.forEach((event) => {
       const eventPresenter = new EventPresenter(this.#tripEventElement.querySelector('.trip-events__list'));
-      eventPresenter.init(event, this.#destinations, this.#offers, this.#onEventChange);
+      eventPresenter.init(event, this.#destinations, this.#offers, this.#onEventChange, this.#resetEventViews);
       this.#eventPresenters.set(event.id, eventPresenter);
     });
   }
@@ -80,5 +80,9 @@ export default class PagePresenter {
   updateEvent(updatedEvent) {
     this.#events = this.#events.map((event) => event.id === updatedEvent.id ? updatedEvent : event);
     this.#eventPresenters.get(updatedEvent.id).update(updatedEvent);
+  };
+
+  #resetEventViews = () => {
+    this.#eventPresenters.forEach((presenter) => presenter.resetView());
   };
 }
