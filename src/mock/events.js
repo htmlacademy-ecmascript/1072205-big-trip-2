@@ -9,7 +9,7 @@ function getMockEvent() {
     dateFrom: getRandomDate(new Date(), new Date(2025, 6, 1)),
     dateTo: getRandomDate(new Date(2025, 6, 1), new Date(2026, 0, 1)),
     destination: `id-destination${getRandomNumber(DESTINATIONS.length)}`,
-    isFavourite: getRandomBoolean(),
+    isFavourite: false,
     offers: Array.from({ length: getRandomNumber(OFFERS.length)}, getMockOffer),
     type: getRandomArrayElement(EVENT_TYPES),
   };

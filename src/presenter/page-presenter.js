@@ -80,7 +80,7 @@ export default class PagePresenter {
   updateEvent(updatedEvent) {
     this.#events = this.#events.map((event) => event.id === updatedEvent.id ? updatedEvent : event);
     this.#eventPresenters.get(updatedEvent.id).update(updatedEvent);
-  };
+  }
 
   #resetEventViews = () => {
     this.#eventPresenters.forEach((presenter) => presenter.resetView());
