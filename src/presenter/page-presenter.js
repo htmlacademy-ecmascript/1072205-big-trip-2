@@ -1,6 +1,7 @@
 import { render, RenderPosition } from '../framework/render.js';
-import { generateFilter } from '../utils/filters.js';
-import { updateItem } from '../utils/common.js';
+import { generateFilter } from '../utils/filter.js';
+import { generateSort } from '../utils/sort.js';
+import { updateItem } from '../utils/event.js';
 import EventListView from '../view/event-list-view.js';
 import FiltersView from '../view/filters-view.js';
 import NoEventView from '../view/no-event-view.js';
@@ -60,7 +61,7 @@ export default class PagePresenter {
   }
 
   #renderSort() {
-    render(new SortView(), this.#tripEventElement);
+    render(new SortView({sorts: generateSort()}), this.#tripEventElement);
   }
 
   #renderEventList() {

@@ -1,5 +1,6 @@
 const EVENT_TYPES = ['Taxi', 'Bus', 'Train', 'Ship', 'Drive', 'Flight', 'Check-in', 'Sightseeing', 'Restaurant'];
 const DESTINATIONS = ['London', 'Manchester', 'Edinburgh', 'Birmingham', 'Liverpool', 'Paris', 'Tokyo', 'New York', 'Berlin'];
+
 const OFFERS = [
   'Add luggage',
   'Switch to comfort class',
@@ -11,6 +12,7 @@ const OFFERS = [
   'Add breakfast',
   'Book tickets',
   'Lunch in city'];
+
 const DESCRIPTIONS = [
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
   'Cras aliquet varius magna, non porta ligula feugiat eget.',
@@ -23,12 +25,58 @@ const DESCRIPTIONS = [
   'Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus.',
   'In rutrum ac purus sit amet tempus.'
 ];
-const PICTURE_URL = 'https://loremflickr.com/248/152?random=';
-const FilterType = {
-  EVERYTHING: 'everything',
-  FUTURE: 'future',
-  PRESENT: 'present',
-  PAST: 'past',
-};
 
-export { EVENT_TYPES, OFFERS, DESTINATIONS, DESCRIPTIONS, PICTURE_URL, FilterType };
+const PICTURE_URL = 'https://loremflickr.com/248/152?random=';
+
+const FILTERS = [
+  {
+    type: 'everything',
+    filter: (events) => events.filter((event) => event),
+    isChecked: true,
+  },
+  {
+    type: 'future',
+    filter: (events) => events.filter((event) => event.dateTo < new Date()),
+    isChecked: false,
+  },
+  {
+    type: 'present',
+    filter: (events) => events.filter((event) => event.dateTo > new Date() && event.dateFrom < new Date()),
+    isChecked: false,
+  },
+  {
+    type: 'past',
+    filter: (events) => events.filter((event) => event.dateFrom > new Date()),
+    isChecked: false,
+  },
+]
+
+const SORTS = [
+  {
+    type: 'day',
+    sort: (events) => events.sort((event1, event2) => event1[dateFrom] - event2[dateFrom]),
+    isChecked: true,
+  },
+  {
+    type: 'event',
+    sort: (events) => events.sort((event1, event2) => event1[DestinationById].localeCompare(event2[DestinationById])),
+    isChecked: false,
+  },
+  {
+    type: 'time',
+    sort: (events) => events.sort((event1, event2) => event1[dateFrom] - event2[dateFrom]),
+    isChecked: false,
+  },
+  {
+    type: 'price',
+    sort: (events) => events.sort((event1, event2) => event1[price] - event2[price]),
+    isChecked: false,
+  },
+  {
+    type: 'offers',
+    sort: (events) => events.sort((event1, event2) => event1[offers].localeCompare(event2[offers])),
+    isChecked: false,
+  },
+]
+
+export { EVENT_TYPES, OFFERS, DESTINATIONS, DESCRIPTIONS, PICTURE_URL, FILTERS, SORTS };
