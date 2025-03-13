@@ -6,22 +6,43 @@ export default class EventView extends AbstractView {
   #destinations = [];
   #offers = [];
   #handleEditClick = null;
+  #handleFavoriteClick = null;
 
-  constructor({event, destinations, offers, onEditClick}) {
+  constructor({ event, destinations, offers, onEditClick, onFavoriteClick }) {
     super();
     this.#event = event;
     this.#destinations = destinations;
     this.#offers = offers;
     this.#handleEditClick = onEditClick;
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
+    this.#handleFavoriteClick = onFavoriteClick;
+
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onEditClick);
+    this.element.querySelector('.event__favorite-btn').addEventListener('click', this.#onFavoriteButtonClick);
   }
 
   get template() {
     return createEventTemplate(this.#event, this.#destinations, this.#offers);
   }
 
-  #editClickHandler = (evt) => {
+  #onEditClick = (evt) => {
     evt.preventDefault();
     this.#handleEditClick();
   };
+
+  #onFavoriteButtonClick = (evt) => {
+    evt.preventDefault();
+    this.#event.isFavorite = !this.#event.isFavorite;
+    if (typeof this.#handleFavoriteClick === 'function') {
+      this.#handleFavoriteClick(!this.#event.isFavorite);
+    }
+    this.updateFavoriteButton(this.#event.isFavorite);
+  };
+
+  updateFavoriteButton(isFavorite) {
+    const favoriteButton = this.element.querySelector('.event__favorite-btn');
+
+    if (favoriteButton) {
+      favoriteButton.classList.toggle('event__favorite-btn--active', isFavorite);
+    }
+  }
 }

@@ -1,6 +1,5 @@
 function getRandomBoolean() {
-  const bool = Math.random() < 0.5;
-  return bool;
+  return Math.random() < 0.5;
 }
 
 function getRandomNumber(maxNumber) {
@@ -15,4 +14,12 @@ function getRandomDate(start = new Date(), end = new Date()) {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
 
-export { getRandomArrayElement, getRandomNumber, getRandomBoolean, getRandomDate };
+function isEscape(evt) {
+  return evt.key === 'Escape';
+}
+
+function updateItem(items, update) {
+  return items.map((item) => item.id === update.id ? update : item);
+}
+
+export { getRandomArrayElement, getRandomNumber, getRandomBoolean, getRandomDate, isEscape, updateItem };
