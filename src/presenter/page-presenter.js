@@ -47,7 +47,9 @@ export default class PagePresenter {
   #renderEventList() {
     this.#eventListPresenter = new EventsListPresenter(this.#eventsModel);
     this.#eventListPresenter.init();
-    this.#eventPresenters = this.#eventListPresenter.getEventPresenters(); // Получаем презентеры событий
+
+    // Теперь мы можем получить презентеры событий
+    this.#eventPresenters = this.#eventListPresenter.getEventPresenters();
   }
 
   #onEventChange = (updatedEvent) => {
