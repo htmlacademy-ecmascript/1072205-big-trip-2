@@ -4,17 +4,19 @@ import EventEditFormView from '../view/event-edit-form-view/event-edit-form-view
 import EventView from '../view/event-view/event-view.js';
 
 export default class EventPresenter {
-  #tripEventsListElement = null;
   #event = null;
   #destinations = [];
   #offers = [];
+  #tripEventsListElement = null;
 
   #eventComponent = null;
   #eventEditFormComponent = null;
 
   #onDataChange = null;
   #onResetView = null;
-  #handleFavoriteClick = null;
+  #onEditClick = null; // Для корректного вызова редактирования
+
+  static #currentlyEditing = null; // Статическое поле для отслеживания открытой формы
 
   constructor(container) {
     this.#tripEventsListElement = container;
@@ -25,32 +27,34 @@ export default class EventPresenter {
       this.#tripEventsListElement = document.querySelector('.trip-events__list');
     }
 
+    this.#event = event;
     this.#destinations = destinations;
     this.#offers = offers;
     this.#onDataChange = onDataChange;
-    this.#onResetView = onResetView; // Сохраняем ссылку на метод сброса вида
-    this.#event = event;
+    this.#onResetView = onResetView;
 
+    // Предыдущие компоненты
     const prevEventComponent = this.#eventComponent;
     const prevEventEditComponent = this.#eventEditFormComponent;
 
+    // Новый компонент события
     this.#eventComponent = new EventView({
       event,
       destinations,
       offers,
-      onEditClick: this.#handleEditClick, // Теперь вызываем метод-обработчик
-      onFavoriteClick: this.#handleFavoriteClick
+      onEditClick: this.#handleEditClick,
+      onFavoriteClick: this.handleFavoriteClick,
     });
 
+    // Новый компонент формы редактирования события
     this.#eventEditFormComponent = new EventEditFormView({
       event,
       destinations,
       offers,
       onFormSubmit: () => this.#replaceFormToItem(),
       onEditClick: () => {
-        this.#onResetView(); // Закрываем все открытые формы перед открытием новой
+        this.#onResetView(); // Закрыть другие формы
         this.#replaceItemToForm();
-        this.#replaceFormToItem();
       },
     });
 
@@ -88,7 +92,11 @@ export default class EventPresenter {
   }
 
   #handleEditClick = () => {
-    this.#onResetView();
+    if (EventPresenter.#currentlyEditing) {
+      EventPresenter.#currentlyEditing.resetView(); // Закрыть уже открытую форму
+    }
+    EventPresenter.#currentlyEditing = this; // Установить текущий презентер как редактируемый
+    this.#onResetView(); // Закрыть все формы перед открытием новой
     this.#replaceItemToForm();
   };
 
