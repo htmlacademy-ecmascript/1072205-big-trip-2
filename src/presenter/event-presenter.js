@@ -79,10 +79,9 @@ export default class EventPresenter {
   }
 
   // Обработчик клика по избранному
-  #handleFavoriteClick = () => {
-    const updatedEvent = { ...this.#event, isFavorite: !this.#event.isFavorite };
+  #handleFavoriteClick = (isFavorite) => {
+    const updatedEvent = { ...this.#event, isFavorite };
     this.#onDataChange(updatedEvent);
-    this.#eventComponent.updateFavoriteButton(updatedEvent.isFavorite);
   };
 
   // Обновление события
