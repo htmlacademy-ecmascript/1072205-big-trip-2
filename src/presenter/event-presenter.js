@@ -53,10 +53,11 @@ export default class EventPresenter {
       offers,
       onFormSubmit: () => this.#replaceFormToItem(),
       onEditClick: () => {
-        this.#onResetView(); // Закрыть другие формы
-        this.#replaceItemToForm();
+        this.#replaceFormToItem(); // Закрываем форму редактирования
       },
     });
+
+
 
     // Если компоненты уже были отрисованы, заменяем их
     if (prevEventComponent && prevEventEditComponent) {
