@@ -54,29 +54,30 @@ const FILTERS = [
 const SORTS = [
   {
     type: 'day',
-    sort: (events) => events.sort((event1, event2) => event1[dateFrom] - event2[dateFrom]),
+    sort: (events) => events.sort((event1, event2) => event1.dateFrom - event2.dateFrom),
     isChecked: true,
   },
   {
     type: 'event',
-    sort: (events) => events.sort((event1, event2) => event1[DestinationById].localeCompare(event2[DestinationById])),
+    sort: (events) => events.sort((event1, event2) => event1.destination.localeCompare(event2.destination)),
     isChecked: false,
   },
   {
     type: 'time',
-    sort: (events) => events.sort((event1, event2) => event1[dateFrom] - event2[dateFrom]),
+    sort: (events) => events.sort((event1, event2) => (event2.dateTo - event2.dateFrom) - (event1.dateTo - event1.dateFrom)),
     isChecked: false,
   },
   {
     type: 'price',
-    sort: (events) => events.sort((event1, event2) => event1[price] - event2[price]),
+    sort: (events) => events.sort((event1, event2) => event2.price - event1.price),
     isChecked: false,
   },
   {
     type: 'offers',
-    sort: (events) => events.sort((event1, event2) => event1[offers].localeCompare(event2[offers])),
+    sort: (events) => events.sort((event1, event2) => event2.offers.length - event1.offers.length),
     isChecked: false,
   },
-]
+];
+
 
 export { EVENT_TYPES, OFFERS, DESTINATIONS, DESCRIPTIONS, PICTURE_URL, FILTERS, SORTS };

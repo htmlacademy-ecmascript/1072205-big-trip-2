@@ -46,7 +46,7 @@ export default class EventsListPresenter {
     const sorts = generateSort();
     const sortView = new SortView({
       sorts,
-      onSortChange: this.#handleSortChange,
+      onSortChange: this.#handleSortChange.bind(this), // Привязываем контекст
     });
     render(sortView, this.#tripEventElement);
     sortView.setEventListeners();
@@ -68,16 +68,19 @@ export default class EventsListPresenter {
     // Сортировка в зависимости от типа
     switch (sortType) {
       case 'day':
+
         this.#events.sort((a, b) => new Date(a.dateFrom) - new Date(b.dateFrom));
         break;
       case 'event':
         this.#events.sort((a, b) => a.destination.localeCompare(b.destination));
         break;
-      case 'time':
-        this.#events.sort((a, b) => new Date(a.dateFrom) - new Date(b.dateFrom));
-        break;
+        case 'time':
+          this.#events.sort((a, b) =>
+            (new Date(b.dateTo) - new Date(b.dateFrom)) - (new Date(a.dateTo) - new Date(a.dateFrom))
+          );
+          break;
       case 'price':
-        this.#events.sort((a, b) => a.price - b.price);
+        this.#events.sort((a, b) => a.basePrice - b.basePrice);
         break;
       case 'offers':
         this.#events.sort((a, b) => a.offers.length - b.offers.length);
