@@ -57,8 +57,6 @@ export default class EventPresenter {
       },
     });
 
-
-
     // Если компоненты уже были отрисованы, заменяем их
     if (prevEventComponent && prevEventEditComponent) {
       replace(this.#eventComponent, prevEventComponent);
@@ -97,7 +95,7 @@ export default class EventPresenter {
     }
   }
 
-    #handleEditClick = () => {
+  #handleEditClick = () => {
     if (EventPresenter.#currentlyEditing) {
       EventPresenter.#currentlyEditing.resetView(); // Закрыть уже открытую форму
     }
@@ -105,8 +103,6 @@ export default class EventPresenter {
     this.#onResetView(); // Закрыть все формы перед открытием новой
     this.#replaceItemToForm();
   };
-
-
 
   // Заменяет представление события на форму редактирования
   #replaceItemToForm() {

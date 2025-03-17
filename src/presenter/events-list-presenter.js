@@ -68,19 +68,18 @@ export default class EventsListPresenter {
     // Сортировка в зависимости от типа
     switch (sortType) {
       case 'day':
-
         this.#events.sort((a, b) => new Date(a.dateFrom) - new Date(b.dateFrom));
         break;
       case 'event':
         this.#events.sort((a, b) => a.destination.localeCompare(b.destination));
         break;
-        case 'time':
-          this.#events.sort((a, b) =>
-            (new Date(b.dateTo) - new Date(b.dateFrom)) - (new Date(a.dateTo) - new Date(a.dateFrom))
-          );
-          break;
+      case 'time':
+        this.#events.sort((a, b) =>
+          (new Date(b.dateTo) - new Date(b.dateFrom)) - (new Date(a.dateTo) - new Date(a.dateFrom))
+        );
+        break;
       case 'price':
-        this.#events.sort((a, b) => a.basePrice - b.basePrice);
+        this.#events.sort((a, b) => b.basePrice - a.basePrice);
         break;
       case 'offers':
         this.#events.sort((a, b) => a.offers.length - b.offers.length);
@@ -94,7 +93,7 @@ export default class EventsListPresenter {
 
     // Перерисовываем список с отсортированными событиями
     this.#renderEventList();
-  }
+  };
 
   // Метод для обновления события
   #onEventChange = (updatedEvent) => {

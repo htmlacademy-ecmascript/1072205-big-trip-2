@@ -49,7 +49,7 @@ const FILTERS = [
     filter: (events) => events.filter((event) => event.dateFrom > new Date()),
     isChecked: false,
   },
-]
+];
 
 const SORTS = [
   {

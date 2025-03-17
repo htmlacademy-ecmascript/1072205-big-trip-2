@@ -1,6 +1,6 @@
 import AbstractView from '../framework/view/abstract-view';
 
-function createSortItemTemplate(sort, onSortChange) {
+function createSortItemTemplate(sort) {
   const { type, isChecked } = sort;
 
   return (
@@ -12,7 +12,8 @@ function createSortItemTemplate(sort, onSortChange) {
         name="trip-sort"
         value="sort-${type}"
         ${isChecked ? 'checked' : ''}
-        data-sort-type="${type}">
+        data-sort-type="${type}"
+        ${((type === 'event') || (type === 'offers')) && 'disabled'}>
       <label class="trip-sort__btn" for="sort-${type}" data-sort-type="${type}">${type}</label>
     </div>`
   );

@@ -1,4 +1,4 @@
-import { SORTS } from "../const";
+import { SORTS } from '../const';
 
 function generateSort() {
   return SORTS.map(({ type, sort, isChecked }) => ({
