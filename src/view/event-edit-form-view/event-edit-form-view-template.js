@@ -46,7 +46,7 @@ function createEventEditFormTemplate(event, destinations, offersList) {
   const startTime = `${humanizeDate(dateFrom, EDIT_FORM_DATE_FORMAT).date} ${humanizeDate(dateFrom).time}`;
   const endTime = humanizeDate(dateTo, EDIT_FORM_DATE_FORMAT).date + humanizeDate(dateTo).time;
   const destinationById = destinations.find((dest) => dest.id === destination);
-  const offersByType = offersList.find((offer) => offer.type === type).offers;
+  const offersByType = offersList.find((offer) => offer.type.toLowerCase() === type.toLowerCase())?.offers ?? [];
 
   return (
     `<li class="trip-events__item">
