@@ -70,10 +70,8 @@ export default class EventEditFormView extends AbstractStatefulView {
     });
   };
 
-
-
   #destinationChangeHandler = (evt) => {
-    const selectedDestination = this.#destinations.find(dest => dest.name === evt.target.value);
+    const selectedDestination = this.#destinations.find((dest) => dest.name === evt.target.value);
     if (selectedDestination) {
       this.updateElement({
         destination: selectedDestination.id,
