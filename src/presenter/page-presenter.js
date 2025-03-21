@@ -1,5 +1,4 @@
 import { render, RenderPosition } from '../framework/render.js';
-import { updateItem } from '../utils/event.js';
 import TripInfoView from '../view/trip-info-view.js';
 import NoEventView from '../view/no-event-view.js';
 import EventsListPresenter from './events-list-presenter.js';
@@ -52,17 +51,8 @@ export default class PagePresenter {
     this.#eventPresenters = this.#eventListPresenter.getEventPresenters();
   }
 
-  #onEventChange = (updatedEvent) => {
-    this.#events = updateItem(this.#events, updatedEvent);
-    this.#eventPresenters.get(updatedEvent.id)?.update(updatedEvent);
-  };
-
   updateEvent(updatedEvent) {
     this.#events = this.#events.map((event) => event.id === updatedEvent.id ? updatedEvent : event);
     this.#eventPresenters.get(updatedEvent.id)?.update(updatedEvent);
   }
-
-  #resetEventViews = () => {
-    this.#eventPresenters.forEach((presenter) => presenter.resetView());
-  };
 }
