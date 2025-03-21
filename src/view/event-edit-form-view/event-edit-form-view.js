@@ -50,23 +50,13 @@ export default class EventEditFormView extends AbstractStatefulView {
     this.#handleEditClick();
   };
 
-  // #eventTypeChangeHandler = (evt) => {
-  //   const newType = evt.target.value;
-  //   const newOffersByType = this.#offers.find((offer) => offer.type.toLowerCase() === newType.toLowerCase())?.offers ?? [];
-
-  //   this.updateElement({
-  //     type: newType,
-  //     offers: newOffersByType.map(offer => offer.id), // Обновляем ID предложений для нового типа
-  //   });
-  // };
-
   #eventTypeChangeHandler = (evt) => {
     const newType = evt.target.value;
     const newOffersByType = this.#offers.find((offer) => offer.type.toLowerCase() === newType.toLowerCase())?.offers ?? [];
 
     this.updateElement({
       type: newType,
-      offers: newOffersByType, // Храним полные объекты офферов, а не только их ID
+      offers: newOffersByType,
     });
   };
 
