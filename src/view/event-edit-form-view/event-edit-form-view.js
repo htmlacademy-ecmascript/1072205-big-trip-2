@@ -1,6 +1,8 @@
 import AbstractStatefulView from '../../framework/view/abstract-stateful-view.js';
 import { createEventEditFormTemplate } from './event-edit-form-view-template.js';
 import { EVENT_TYPES } from '../../const.js';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css'; // Подключаем стили
 
 const BLANK_EVENT = {
   id: '',
@@ -18,6 +20,8 @@ export default class EventEditFormView extends AbstractStatefulView {
   #offers = [];
   #handleFormSubmit = null;
   #handleEditClick = null;
+  #datepickerStart = null;
+  #datepickerEnd = null;
 
   constructor({ event = BLANK_EVENT, destinations, offers, onFormSubmit, onEditClick }) {
     super();
@@ -38,6 +42,8 @@ export default class EventEditFormView extends AbstractStatefulView {
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#eventTypeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
+
+    this.#setDatepickers(); // Инициализируем flatpickr после рендеринга
   }
 
   #formSubmitHandler = (evt) => {
@@ -68,6 +74,57 @@ export default class EventEditFormView extends AbstractStatefulView {
       });
     }
   };
+
+  removeElement() {
+    super.removeElement();
+    if (this.#datepickerStart) {
+      this.#datepickerStart.destroy();
+      this.#datepickerStart = null;
+    }
+    if (this.#datepickerEnd) {
+      this.#datepickerEnd.destroy();
+      this.#datepickerEnd = null;
+    }
+  }
+
+  #dateFromChangeHandler = ([userDate]) => {
+    this.updateElement({
+      dateFrom: userDate,
+    });
+  };
+
+  #dateToChangeHandler = ([userDate]) => {
+    this.updateElement({
+      dateTo: userDate,
+    });
+  };
+
+  #setDatepickers() {
+    const startInput = this.element.querySelector('#event-start-time-1');
+    const endInput = this.element.querySelector('#event-end-time-1');
+
+    if (this.#datepickerStart) {
+      this.#datepickerStart.destroy();
+    }
+    if (this.#datepickerEnd) {
+      this.#datepickerEnd.destroy();
+    }
+
+    this.#datepickerStart = flatpickr(startInput, {
+      enableTime: true,
+      dateFormat: 'd/m/y H:i', // Формат из ТЗ
+      defaultDate: this._state.dateFrom,
+      onChange: this.#dateFromChangeHandler,
+    });
+
+    this.#datepickerEnd = flatpickr(endInput, {
+      enableTime: true,
+      dateFormat: 'd/m/y H:i', // Формат из ТЗ
+      defaultDate: this._state.dateTo,
+      minDate: this._state.dateFrom, // Запрещаем выбирать дату окончания раньше начала
+      onChange: this.#dateToChangeHandler,
+    });
+  }
 
   static parseEventToState(event) {
     return { ...event };
