@@ -7,6 +7,7 @@ import FiltersView from '../view/filters-view.js';
 import SortView from '../view/sort-view.js';
 import EventPresenter from './event-presenter.js';
 
+
 export default class EventsListPresenter {
   #eventsModel = null;
   #events = [];
@@ -22,6 +23,10 @@ export default class EventsListPresenter {
 
   constructor(eventsModel) {
     this.#eventsModel = eventsModel;
+  }
+
+  get tasks() {
+    return this.#tasksModel.tasks;
   }
 
   init() {
