@@ -136,4 +136,10 @@ export default class EventEditFormView extends AbstractStatefulView {
   static parseStateToEvent(state) {
     return { ...state };
   }
+
+  getUpdatedEvent() {
+    return {
+      ...this._state,
+    };
+  }
 }

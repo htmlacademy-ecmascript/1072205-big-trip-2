@@ -5,21 +5,28 @@ import EventsListPresenter from './events-list-presenter.js';
 
 export default class PagePresenter {
   #eventsModel = null;
+  #destinationsModel = null;
+  #offersModel = null;
+
   #events = [];
   #destinations = [];
-  #eventPresenters = new Map(); // Добавлено объявление
+  #offers = [];
+  #eventPresenters = new Map();
 
   #tripMainElement = null;
   #tripEventElement = null;
-  #eventListPresenter = null; // Добавляем переменную для хранения списка событий
+  #eventListPresenter = null;
 
-  constructor(eventsModel) {
+  constructor(eventsModel, destinationsModel, offersModel) {
     this.#eventsModel = eventsModel;
+    this.#destinationsModel = destinationsModel;
+    this.#offersModel = offersModel;
   }
 
   init() {
     this.#events = [...this.#eventsModel.events];
-    this.#destinations = [...this.#eventsModel.destinations];
+    this.#destinations = [...this.#destinationsModel.destinations];
+    this.#offers = [...this.#offersModel.offers];
 
     this.#tripMainElement = document.querySelector('.trip-main');
     this.#tripEventElement = document.querySelector('.page-main .trip-events');
@@ -35,24 +42,33 @@ export default class PagePresenter {
 
   #renderNoEvent() {
     if (this.#events.length === 0) {
-      render(new NoEventView(this.#tripEventElement), this.#tripEventElement);
+      render(new NoEventView(), this.#tripEventElement);
     }
   }
 
   #renderTripInfo() {
-    render(new TripInfoView({ events: this.#events, destinations: this.#destinations }), this.#tripMainElement, RenderPosition.AFTERBEGIN);
+    render(
+      new TripInfoView({
+        events: this.#events,
+        destinations: this.#destinations,
+        offers: this.#offers,
+      }),
+      this.#tripMainElement,
+      RenderPosition.AFTERBEGIN
+    );
   }
 
   #renderEventList() {
-    this.#eventListPresenter = new EventsListPresenter(this.#eventsModel);
+    this.#eventListPresenter = new EventsListPresenter(this.#eventsModel, this.#destinationsModel, this.#offersModel);
     this.#eventListPresenter.init();
 
-    // Теперь мы можем получить презентеры событий
     this.#eventPresenters = this.#eventListPresenter.getEventPresenters();
   }
 
   updateEvent(updatedEvent) {
-    this.#events = this.#events.map((event) => event.id === updatedEvent.id ? updatedEvent : event);
+    this.#events = this.#events.map((event) =>
+      event.id === updatedEvent.id ? updatedEvent : event
+    );
     this.#eventPresenters.get(updatedEvent.id)?.update(updatedEvent);
   }
 }

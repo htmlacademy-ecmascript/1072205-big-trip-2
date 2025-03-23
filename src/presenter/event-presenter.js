@@ -2,6 +2,7 @@ import { render, replace, remove } from '../framework/render.js';
 import { isEscape } from '../utils/common.js';
 import EventEditFormView from '../view/event-edit-form-view/event-edit-form-view.js';
 import EventView from '../view/event-view/event-view.js';
+import { UserAction, UpdateType } from '../const.js';
 
 export default class EventPresenter {
   #event = null;
@@ -14,50 +15,43 @@ export default class EventPresenter {
 
   #onDataChange = null;
   #onResetView = null;
-  #onEditClick = null; // Для корректного вызова редактирования
 
-  static #currentlyEditing = null; // Статическое поле для отслеживания открытой формы
+  static #currentlyEditing = null;
 
   constructor(container) {
     this.#tripEventsListElement = container;
   }
 
-  init(event, destinations, offers, onDataChange, onResetView) {
+  init(event, destinationsModel, offersModel, onDataChange, onResetView) {
     if (!this.#tripEventsListElement) {
       this.#tripEventsListElement = document.querySelector('.trip-events__list');
     }
 
     this.#event = event;
-    this.#destinations = destinations;
-    this.#offers = offers;
+    this.#destinations = destinationsModel;
+    this.#offers = offersModel;
     this.#onDataChange = onDataChange;
-    this.#onResetView = onResetView; // Сохраняем ссылку на метод сброса вида
+    this.#onResetView = onResetView;
 
-    // Сохраняем предыдущие компоненты
     const prevEventComponent = this.#eventComponent;
     const prevEventEditComponent = this.#eventEditFormComponent;
 
-    // Создаем новый компонент события
     this.#eventComponent = new EventView({
-      event,
-      destinations,
-      offers,
+      event: this.#event,
+      destinations: this.#destinations,
+      offers: this.#offers,
       onEditClick: this.#handleEditClick,
       onFavoriteClick: this.#handleFavoriteClick
     });
 
-    // Создаем новый компонент формы редактирования события
     this.#eventEditFormComponent = new EventEditFormView({
       event,
-      destinations,
-      offers,
-      onFormSubmit: () => this.#replaceFormToItem(),
-      onEditClick: () => {
-        this.#replaceFormToItem(); // Закрываем форму редактирования
-      },
+      destinations: this.#destinations,
+      offers: this.#offers,
+      onFormSubmit: this.#handleFormSubmit, // Сохранение данных при отправке
+      onEditClick: this.#handleCloseClick, // Закрытие формы без сохранения
     });
 
-    // Если компоненты уже были отрисованы, заменяем их
     if (prevEventComponent && prevEventEditComponent) {
       replace(this.#eventComponent, prevEventComponent);
       replace(this.#eventEditFormComponent, prevEventEditComponent);
@@ -66,62 +60,77 @@ export default class EventPresenter {
       return;
     }
 
-    // Отрисовываем компонент события в списке
     render(this.#eventComponent, this.#tripEventsListElement);
   }
 
-  // Удаление компонентов события
   destroy() {
     remove(this.#eventComponent);
     remove(this.#eventEditFormComponent);
   }
 
-  // Обработчик клика по избранному
-  #handleFavoriteClick = (isFavorite) => {
-    const updatedEvent = { ...this.#event, isFavorite };
-    this.#onDataChange(updatedEvent);
-  };
-
-  // Обновление события
-  update(updatedEvent) {
+ update(updatedEvent) {
     this.#event = updatedEvent;
     this.#eventComponent.updateFavoriteButton(updatedEvent.isFavorite);
   }
 
-  // Сброс вида (возврат к обычному представлению события)
   resetView() {
     if (this.#tripEventsListElement.contains(this.#eventEditFormComponent.element)) {
-      this.#replaceFormToItem();
+      this.#handleCloseClick();
     }
   }
 
+  #handleFavoriteClick = () => {
+    const updatedEvent = {
+      ...this.#event,
+      isFavorite: !this.#event.isFavorite
+    };
+
+    // Обновляем данные
+    this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.PATCH, updatedEvent);
+
+    // После обновления данных перерисовываем только компонент
+    this.update(updatedEvent);
+  };
+
   #handleEditClick = () => {
     if (EventPresenter.#currentlyEditing) {
-      EventPresenter.#currentlyEditing.resetView(); // Закрыть уже открытую форму
+      EventPresenter.#currentlyEditing.resetView();
     }
-    EventPresenter.#currentlyEditing = this; // Установить текущий презентер как редактируемый
-    this.#onResetView(); // Закрыть все формы перед открытием новой
+    EventPresenter.#currentlyEditing = this;
+    this.#onResetView();
     this.#replaceItemToForm();
   };
 
-  // Заменяет представление события на форму редактирования
+  #handleFormSubmit = (updatedEvent) => {
+    // Отправляем данные в модель, только если они действительно изменились
+    const newEvent = { ...this.#event, ...updatedEvent };
+
+    if (JSON.stringify(this.#event) !== JSON.stringify(newEvent)) {
+      this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, newEvent);
+      this.#event = newEvent;  // Обновляем локальное состояние
+    }
+
+    this.#replaceFormToItem();  // Закрываем форму и возвращаем к обычному виду
+  };
+
+  #handleCloseClick = () => {
+    this.#replaceFormToItem(); // Просто закрывает форму без сохранения
+  };
+
   #replaceItemToForm() {
     replace(this.#eventEditFormComponent, this.#eventComponent);
     document.addEventListener('keydown', this.#escKeyDownHandler);
   }
 
-
-  // Заменяет форму редактирования на представление события
   #replaceFormToItem() {
-    replace(this.#eventComponent, this.#eventEditFormComponent);
+    replace(this.#eventComponent, this.#eventEditFormComponent);  // Заменяем форму на обычный элемент
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 
-  // Обработчик нажатия клавиши Escape
   #escKeyDownHandler = (evt) => {
     if (isEscape(evt)) {
       evt.preventDefault();
-      this.#replaceFormToItem();
+      this.#handleCloseClick(); // Закрытие без сохранения при ESC
     }
   };
 }

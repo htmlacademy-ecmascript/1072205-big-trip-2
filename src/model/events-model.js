@@ -1,36 +1,38 @@
 import { getMockEvent } from '../mock/events.js';
-import { getMockDestinations } from '../mock/destinations.js';
-import { getMockTypeOffers } from '../mock/offers.js';
+import { UpdateType } from '../const.js';
 import Observable from '../framework/observable.js';
 
 const EVENT_COUNT = 3;
 
 export default class EventsModel extends Observable {
   #events = Array.from({ length: EVENT_COUNT }, getMockEvent);
-  #destinations = getMockDestinations();
-  #offers = getMockTypeOffers();
 
   get events() {
     return this.#events;
   }
 
-  set events(newEvents) {
-    this.#events = newEvents;
+  updateEvent(updateType, update) {
+    const index = this.events.findIndex(event => event.id === update.id);
+    if (index !== -1) {
+      this.events[index] = update;
+      this._notify(updateType, update);
+    }
   }
 
-  get destinations() {
-    return this.#destinations;
+  addEvent(updateType, newEvent) {
+    this.#events = [newEvent, ...this.#events];
+
+    this._notify(updateType, newEvent);
   }
 
-  set destinations(newDestinations) {
-    this.#destinations = newDestinations;
-  }
+  deleteEvent(updateType, eventToDelete) {
+    const initialLength = this.#events.length;
+    this.#events = this.#events.filter((event) => event.id !== eventToDelete.id);
 
-  get offers() {
-    return this.#offers;
-  }
+    if (initialLength === this.#events.length) {
+      throw new Error('Can\'t delete unexisting event');
+    }
 
-  set offers(newOffers) {
-    this.#offers = newOffers;
+    this._notify(updateType, eventToDelete);
   }
 }
