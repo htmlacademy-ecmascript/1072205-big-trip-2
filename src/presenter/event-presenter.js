@@ -79,12 +79,14 @@ export default class EventPresenter {
     }
   }
 
+
+
   #handleFavoriteClick = () => {
     const updatedEvent = {
       ...this.#event,
       isFavorite: !this.#event.isFavorite
     };
-
+    console.log('Жмяк');
     // Обновляем данные
     this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.PATCH, updatedEvent);
 

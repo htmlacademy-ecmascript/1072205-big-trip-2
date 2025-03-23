@@ -32,12 +32,27 @@ function createSortTemplate(sortItems, onSortChange) {
 export default class SortView extends AbstractView {
   #sorts = null;
   #onSortChange = null;
+  #currentSortType = null;
 
   constructor({ sorts, onSortChange }) {
     super();
     this.#sorts = sorts;
     this.#onSortChange = onSortChange;
+
+    this.element.addEventListener('click', this.#handleSortClick);
   }
+
+  #handleSortClick = (evt) => {
+    const sortType = evt.target.dataset.sortType;
+    console.log('Клик по сортировке:', sortType); // Отладка
+
+    if (!sortType || sortType === this.#currentSortType) {
+      return;
+    }
+
+    this.#currentSortType = sortType; // ✅ Сохраняем текущий тип сортировки
+    this.#onSortChange(sortType);
+  };
 
   get template() {
     return createSortTemplate(this.#sorts, this.#onSortChange);

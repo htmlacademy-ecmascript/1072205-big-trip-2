@@ -54,7 +54,7 @@ const FILTERS = [
 const SORTS = [
   {
     type: 'day',
-    sort: (events) => events.sort((event1, event2) => event1.dateFrom - event2.dateFrom),
+    sort: (a, b) => new Date(a.dateFrom) - new Date(b.dateFrom),
     isChecked: true,
   },
   {
@@ -64,12 +64,12 @@ const SORTS = [
   },
   {
     type: 'time',
-    sort: (events) => events.sort((event1, event2) => (event2.dateTo - event2.dateFrom) - (event1.dateTo - event1.dateFrom)),
+    sort: (a, b) => (b.dateTo - b.dateFrom) - (a.dateTo - a.dateFrom),
     isChecked: false,
   },
   {
     type: 'price',
-    sort: (events) => events.sort((event1, event2) => event2.price - event1.price),
+    sort: (a, b) => b.basePrice - a.basePrice,
     isChecked: false,
   },
   {

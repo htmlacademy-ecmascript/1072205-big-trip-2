@@ -30,12 +30,12 @@ export default class EventsListPresenter {
   }
 
   get events() {
-    return [...this.#eventsModel.events].sort((a, b) => {
-      switch (this.#currentSortType) {
-        case SORTS[0].type: return new Date(a.dateFrom) - new Date(b.dateFrom);
-        case SORTS[1].type: return new Date(b.dateFrom) - new Date(a.dateFrom);
-        default: return 0;
-      }
+    const events = Array.isArray(this.#eventsModel.events) ? this.#eventsModel.events : [];
+    console.log('Исходные события:', events);
+
+    return [...events].sort((a, b) => {
+      const sortFunction = SORTS.find(sortItem => sortItem.type === this.#currentSortType)?.sort;
+      return sortFunction ? sortFunction(a, b) : 0;
     });
   }
 
@@ -61,6 +61,7 @@ export default class EventsListPresenter {
   }
 
   #renderSort() {
+    console.log('Передаем обработчик в SortView:', this.#handleSortChange);
     const sortView = new SortView({
       sorts: generateSort(),
       onSortChange: this.#handleSortChange,
@@ -70,14 +71,16 @@ export default class EventsListPresenter {
 
   #renderEventList() {
     render(this.#eventListComponent, this.#tripEventElement);
-    this.#events.forEach((event) => this.#renderEvent(event));
+    this.events.forEach((event) => this.#renderEvent(event));
   }
+
+
 
   #renderEvent(event) {
     const eventPresenter = new EventPresenter(
       this.#tripEventElement.querySelector('.trip-events__list')
     );
-    eventPresenter.init(event, this.#destinations, this.#offers, this.#handleViewAction, this.#resetEventViews);
+    eventPresenter.init(event, this.#destinations, this.#offers, this.#resetEventViews, this.#handleViewAction);
     this.#eventPresenters.set(event.id, eventPresenter);
   }
 
@@ -92,11 +95,17 @@ export default class EventsListPresenter {
 
   #handleSortChange = (sortType) => {
     if (this.#currentSortType !== sortType) {
+      console.log('Жмяк', sortType);
       this.#currentSortType = sortType;
+
+      console.log('Отсортированные события:', this.events);
+
       this.#clearEventList();
       this.#renderEventList();
     }
   };
+
+
 
   #resetEventViews = () => {
     this.#eventPresenters.forEach((presenter) => presenter.resetView());
