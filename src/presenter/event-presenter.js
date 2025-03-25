@@ -105,12 +105,8 @@ export default class EventPresenter {
   };
 
   #handleFormSubmit = (updatedEvent) => {
-    console.log('Form submitted, updated event:', updatedEvent);
-
     this.#event = { ...this.#event, ...updatedEvent };
-
     this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, this.#event);
-
     this.#replaceFormToItem(); // Закрываем форму и обновляем карточку
   };
 
@@ -140,9 +136,6 @@ export default class EventPresenter {
     document.addEventListener('keydown', this.#escKeyDownHandler);
   }
 
-
-
-
   #replaceFormToItem() {
     if (!this.#eventEditFormComponent || !this.#eventEditFormComponent.element.parentElement) {
       return; // Если формы уже нет, ничего не делаем
@@ -162,8 +155,6 @@ export default class EventPresenter {
     this.#eventComponent = updatedEventComponent; // Обновляем ссылку на компонент
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
-
-
 
   #escKeyDownHandler = (evt) => {
     if (isEscape(evt)) {

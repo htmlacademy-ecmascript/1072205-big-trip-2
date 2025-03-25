@@ -36,7 +36,7 @@ const FILTERS = [
   },
   {
     type: 'future',
-    filter: (events) => events.filter((event) => event.dateTo < new Date()),
+    filter: (events) => events.filter((event) => event.dateTo > new Date()),
     isChecked: false,
   },
   {
@@ -46,7 +46,7 @@ const FILTERS = [
   },
   {
     type: 'past',
-    filter: (events) => events.filter((event) => event.dateFrom > new Date()),
+    filter: (events) => events.filter((event) => event.dateFrom < new Date()),
     isChecked: false,
   },
 ];

@@ -7,6 +7,7 @@ import EventListView from '../view/event-list-view.js';
 import FiltersView from '../view/filters-view.js';
 import SortView from '../view/sort-view.js';
 import EventPresenter from './event-presenter.js';
+import { FILTERS } from '../const.js';
 
 export default class EventsListPresenter {
   #eventsModel = null;
@@ -22,11 +23,52 @@ export default class EventsListPresenter {
   #tripEventElement = null;
   #filtersElement = null;
   #currentSortType = SORTS[0].type;
+  #currentFilterType = 'everything';
 
   constructor(eventsModel, destinationsModel, offersModel) {
     this.#eventsModel = eventsModel;
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
+  }
+
+  get filteredEvents() {
+    const events = this.#events;
+    console.log('Исходные события:', events); // Проверка
+
+    // Применение фильтра
+    return events.filter(event => {
+      switch (this.#currentFilterType) {
+        case 'everything':
+          return true; // Все события
+        case 'future':
+          return dayjs(event.startDate).isAfter(dayjs()); // Только будущие
+        case 'present':
+          return dayjs(event.startDate).isBefore(dayjs()) && dayjs(event.endDate).isAfter(dayjs()); // Только текущие
+        case 'past':
+          return dayjs(event.endDate).isBefore(dayjs()); // Только прошедшие
+        default:
+          return true;
+      }
+    });
+  }
+
+  #handleFilterChange = (filterType) => {
+    this.#currentFilterType = filterType;
+    this.#clearEventList();
+    this.#renderEventList();  // Перерисовываем список при смене фильтра
+  };
+
+  #applyCurrentFilter(events) {
+    switch (this.#currentFilterType) {
+      case 'future':
+        return events.filter((event) => dayjs(event.dateFrom).isAfter(dayjs()));
+      case 'present':
+        return events.filter((event) => dayjs(event.dateFrom).isBefore(dayjs()) && dayjs(event.dateTo).isAfter(dayjs()));
+      case 'past':
+        return events.filter((event) => dayjs(event.dateTo).isBefore(dayjs()));
+      default:
+        return events;
+    }
   }
 
   get events() {
@@ -56,9 +98,13 @@ export default class EventsListPresenter {
     this.#renderEventList();
   }
 
-  #renderFilters() {
-    render(new FiltersView({ filters: generateFilter(this.#events) }), this.#filtersElement);
-  }
+#renderFilters() {
+  render(new FiltersView({
+    filters: generateFilter(this.#events),
+    currentFilterType: this.#currentFilterType,  // Передаем текущий фильтр
+    onFilterChange: this.#handleFilterChange  // Передаем обработчик фильтрации
+  }), this.#filtersElement);
+}
 
   #renderSort() {
     console.log('Передаем обработчик в SortView:', this.#handleSortChange);
@@ -70,11 +116,36 @@ export default class EventsListPresenter {
   }
 
   #renderEventList() {
+    const filteredEvents = this.filteredEvents; // Применение фильтра
+
+    console.log('Отфильтрованные события:', filteredEvents);  // Проверка
+
     render(this.#eventListComponent, this.#tripEventElement);
-    this.events.forEach((event) => this.#renderEvent(event));
+
+    if (filteredEvents.length === 0) {
+      this.#renderEmptyMessage();  // Показать сообщение, если нет событий
+      return;
+    }
+
+    filteredEvents
+      .sort((a, b) => {
+        const sortFunction = SORTS.find(sortItem => sortItem.type === this.#currentSortType)?.sort;
+        return sortFunction ? sortFunction(a, b) : 0;
+      })
+      .forEach((event) => this.#renderEvent(event)); // Рендерим отфильтрованные события
   }
 
 
+  #renderEmptyMessage() {
+    const message = {
+      'everything': 'There are no events now',
+      'future': 'There are no future events now',
+      'present': 'There are no present events now',
+      'past': 'There are no past events now'
+    }[this.#currentFilterType];
+
+    this.#eventListComponent.element.innerHTML = `<p class="trip-events__msg">${message}</p>`;
+  }
 
   #renderEvent(event) {
     const eventPresenter = new EventPresenter(
@@ -95,17 +166,11 @@ export default class EventsListPresenter {
 
   #handleSortChange = (sortType) => {
     if (this.#currentSortType !== sortType) {
-      console.log('Жмяк', sortType);
       this.#currentSortType = sortType;
-
-      console.log('Отсортированные события:', this.events);
-
       this.#clearEventList();
       this.#renderEventList();
     }
   };
-
-
 
   #resetEventViews = () => {
     this.#eventPresenters.forEach((presenter) => presenter.resetView());
