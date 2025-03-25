@@ -115,7 +115,7 @@ function createEventEditFormTemplate(event, destinations, offersList) {
             <label class="event__label  event__type-output" for="event-destination-1">
               ${type}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destinationById.name}" list="destination-list-1">
+            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination ? destinationById.name : ''}" list="destination-list-1">
             <datalist id="destination-list-1">
               ${createEventDestinationsList(destinations)}
             </datalist>
@@ -148,11 +148,11 @@ function createEventEditFormTemplate(event, destinations, offersList) {
 
           <section class="event__section  event__section--destination">
             <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-            <p class="event__destination-description">${destinationById.description}</p>
+            <p class="event__destination-description">${destination ? destinationById.description : ''}</p>
 
             <div class="event__photos-container">
               <div class="event__photos-tape">
-                ${createDestinationPhotoTemplate(destinationById)}
+                ${destination ? createDestinationPhotoTemplate(destinationById) : ''}
               </div>
             </div>
           </section>

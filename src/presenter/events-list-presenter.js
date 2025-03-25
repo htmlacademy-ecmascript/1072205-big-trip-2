@@ -8,6 +8,7 @@ import FiltersView from '../view/filters-view.js';
 import SortView from '../view/sort-view.js';
 import EventPresenter from './event-presenter.js';
 import { FILTERS } from '../const.js';
+import NewEventPresenter from './new-event-presenter.js';
 
 export default class EventsListPresenter {
   #eventsModel = null;
@@ -24,6 +25,7 @@ export default class EventsListPresenter {
   #filtersElement = null;
   #currentSortType = SORTS[0].type;
   #currentFilterType = 'everything';
+  #newEventPresenter = null;
 
   constructor(eventsModel, destinationsModel, offersModel) {
     this.#eventsModel = eventsModel;
@@ -56,6 +58,42 @@ export default class EventsListPresenter {
     this.#currentFilterType = filterType;
     this.#clearEventList();
     this.#renderEventList();  // Перерисовываем список при смене фильтра
+  };
+  #handleNewEventClick = () => {
+    console.log('жмяк');
+    // Сбрасываем фильтр и сортировку
+    this.#currentFilterType = 'everything';
+    this.#currentSortType = SORTS[0].type;
+
+    // Инициализируем новый Presenter для создания нового события
+    if (!this.#newEventPresenter) {
+      this.#newEventPresenter = new NewEventPresenter({
+        destinationsModel: this.#destinations,
+        offersModel: this.#offers,
+        onDataChange: this.#handleDataChange,
+        onCloseForm: this.#closeNewEventForm,
+      });
+    }
+    console.log(this.#newEventPresenter);
+
+    this.#newEventPresenter.init(); // Инициализируем форму добавления нового события
+  };
+
+  #handleDataChange = (actionType, updateType, updatedEvent) => {
+    if (actionType === UserAction.ADD_EVENT) {
+      this.#eventsModel.addEvent(updateType, updatedEvent);
+      this.#events.push(updatedEvent);
+      this.#clearEventList();
+      this.#renderEventList();
+    }
+  };
+
+  #closeNewEventForm = () => {
+    // Закрытие формы и разблокировка кнопки "New Event"
+    this.#newEventPresenter = null;
+    // Разблокировать кнопку, если она была заблокирована
+    const newEventButton = document.querySelector('.trip-controls__new-event-btn');
+    newEventButton.disabled = false;
   };
 
   #applyCurrentFilter(events) {
@@ -96,6 +134,8 @@ export default class EventsListPresenter {
     this.#renderFilters();
     this.#renderSort();
     this.#renderEventList();
+    const newEventButton = document.querySelector('.trip-main__event-add-btn');
+    newEventButton.addEventListener('click', this.#handleNewEventClick);
   }
 
 #renderFilters() {
