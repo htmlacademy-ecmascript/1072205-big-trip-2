@@ -68,10 +68,12 @@ export default class EventPresenter {
     remove(this.#eventEditFormComponent);
   }
 
- update(updatedEvent) {
+  update(updatedEvent) {
+    console.log('Updating event:', updatedEvent); // Проверка, вызывается ли update()
     this.#event = updatedEvent;
     this.#eventComponent.updateFavoriteButton(updatedEvent.isFavorite);
   }
+
 
   resetView() {
     if (this.#tripEventsListElement.contains(this.#eventEditFormComponent.element)) {
@@ -86,12 +88,11 @@ export default class EventPresenter {
       ...this.#event,
       isFavorite: !this.#event.isFavorite
     };
-    console.log('Жмяк');
-    // Обновляем данные
-    this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.PATCH, updatedEvent);
 
-    // После обновления данных перерисовываем только компонент
-    this.update(updatedEvent);
+    this.#event = updatedEvent; // Сразу обновляем локальные данные
+
+    this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.PATCH, updatedEvent);
+    this.#eventComponent.updateFavoriteButton(updatedEvent.isFavorite);
   };
 
   #handleEditClick = () => {
@@ -104,30 +105,65 @@ export default class EventPresenter {
   };
 
   #handleFormSubmit = (updatedEvent) => {
-    // Отправляем данные в модель, только если они действительно изменились
-    const newEvent = { ...this.#event, ...updatedEvent };
+    console.log('Form submitted, updated event:', updatedEvent);
 
-    if (JSON.stringify(this.#event) !== JSON.stringify(newEvent)) {
-      this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, newEvent);
-      this.#event = newEvent;  // Обновляем локальное состояние
-    }
+    this.#event = { ...this.#event, ...updatedEvent };
 
-    this.#replaceFormToItem();  // Закрываем форму и возвращаем к обычному виду
+    this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, this.#event);
+
+    this.#replaceFormToItem(); // Закрываем форму и обновляем карточку
   };
+
+
 
   #handleCloseClick = () => {
     this.#replaceFormToItem(); // Просто закрывает форму без сохранения
   };
 
   #replaceItemToForm() {
+    if (!this.#eventComponent.element.parentElement) {
+      return; // Если карточки нет в DOM, выходим
+    }
+
+    // Пересоздаём форму заново перед рендерингом
+    this.#eventEditFormComponent = new EventEditFormView({
+      event: this.#event,
+      destinations: this.#destinations,
+      offers: this.#offers,
+      onFormSubmit: this.#handleFormSubmit,
+      onEditClick: this.#handleCloseClick,
+    });
+
     replace(this.#eventEditFormComponent, this.#eventComponent);
+    remove(this.#eventComponent);
+
     document.addEventListener('keydown', this.#escKeyDownHandler);
   }
 
+
+
+
   #replaceFormToItem() {
-    replace(this.#eventComponent, this.#eventEditFormComponent);  // Заменяем форму на обычный элемент
+    if (!this.#eventEditFormComponent || !this.#eventEditFormComponent.element.parentElement) {
+      return; // Если формы уже нет, ничего не делаем
+    }
+
+    const updatedEventComponent = new EventView({
+      event: this.#event, // Обновлённые данные
+      destinations: this.#destinations,
+      offers: this.#offers,
+      onEditClick: this.#handleEditClick,
+      onFavoriteClick: this.#handleFavoriteClick
+    });
+
+    replace(updatedEventComponent, this.#eventEditFormComponent);
+    remove(this.#eventEditFormComponent);
+
+    this.#eventComponent = updatedEventComponent; // Обновляем ссылку на компонент
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
+
+
 
   #escKeyDownHandler = (evt) => {
     if (isEscape(evt)) {

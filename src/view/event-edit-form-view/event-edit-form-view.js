@@ -47,8 +47,10 @@ export default class EventEditFormView extends AbstractStatefulView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
+    console.log('Submitting form with state:', this._state); // Проверка данных перед отправкой
     this.#handleFormSubmit(EventEditFormView.parseStateToEvent(this._state));
   };
+
 
   #editClickHandler = (evt) => {
     evt.preventDefault();
@@ -141,5 +143,10 @@ export default class EventEditFormView extends AbstractStatefulView {
     return {
       ...this._state,
     };
+  }
+
+  updateElement(updatedState) {
+    super.updateElement(updatedState);
+    this._restoreHandlers(); // Заново вешаем обработчики после обновления
   }
 }
