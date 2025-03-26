@@ -1,8 +1,8 @@
 import { render, replace, remove } from '../framework/render.js';
 import { isEscape } from '../utils/common.js';
+import { UserAction, UpdateType } from '../const.js';
 import EventEditFormView from '../view/event-edit-form-view/event-edit-form-view.js';
 import EventView from '../view/event-view/event-view.js';
-import { UserAction, UpdateType } from '../const.js';
 
 export default class EventPresenter {
   #event = null;
@@ -48,8 +48,8 @@ export default class EventPresenter {
       event,
       destinations: this.#destinations,
       offers: this.#offers,
-      onFormSubmit: this.#handleFormSubmit, // Сохранение данных при отправке
-      onEditClick: this.#handleCloseClick, // Закрытие формы без сохранения
+      onFormSubmit: this.#handleFormSubmit,
+      onEditClick: this.#handleCloseClick,
     });
 
     if (prevEventComponent && prevEventEditComponent) {
@@ -63,17 +63,9 @@ export default class EventPresenter {
     render(this.#eventComponent, this.#tripEventsListElement);
   }
 
-  destroy() {
-    remove(this.#eventComponent);
-    remove(this.#eventEditFormComponent);
-  }
-
   update(updatedEvent) {
-    console.log('Updating event:', updatedEvent); // Проверка, вызывается ли update()
     this.#event = updatedEvent;
-    this.#eventComponent.updateFavoriteButton(updatedEvent.isFavorite);
   }
-
 
   resetView() {
     if (this.#tripEventsListElement.contains(this.#eventEditFormComponent.element)) {
@@ -81,17 +73,18 @@ export default class EventPresenter {
     }
   }
 
-
+  destroy() {
+    remove(this.#eventComponent);
+    remove(this.#eventEditFormComponent);
+  }
 
   #handleFavoriteClick = () => {
     const updatedEvent = {
       ...this.#event,
-      isFavorite: !this.#event.isFavorite
+      isFavorite: !this.#event.isFavorite,
     };
 
-    this.#event = updatedEvent; // Сразу обновляем локальные данные
-
-    this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.PATCH, updatedEvent);
+    this.#event = updatedEvent;
     this.#eventComponent.updateFavoriteButton(updatedEvent.isFavorite);
   };
 
@@ -107,21 +100,18 @@ export default class EventPresenter {
   #handleFormSubmit = (updatedEvent) => {
     this.#event = { ...this.#event, ...updatedEvent };
     this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, this.#event);
-    this.#replaceFormToItem(); // Закрываем форму и обновляем карточку
+    this.#replaceFormToItem();
   };
 
-
-
   #handleCloseClick = () => {
-    this.#replaceFormToItem(); // Просто закрывает форму без сохранения
+    this.#replaceFormToItem();
   };
 
   #replaceItemToForm() {
     if (!this.#eventComponent.element.parentElement) {
-      return; // Если карточки нет в DOM, выходим
+      return;
     }
 
-    // Пересоздаём форму заново перед рендерингом
     this.#eventEditFormComponent = new EventEditFormView({
       event: this.#event,
       destinations: this.#destinations,
@@ -138,11 +128,11 @@ export default class EventPresenter {
 
   #replaceFormToItem() {
     if (!this.#eventEditFormComponent || !this.#eventEditFormComponent.element.parentElement) {
-      return; // Если формы уже нет, ничего не делаем
+      return;
     }
 
     const updatedEventComponent = new EventView({
-      event: this.#event, // Обновлённые данные
+      event: this.#event,
       destinations: this.#destinations,
       offers: this.#offers,
       onEditClick: this.#handleEditClick,
@@ -152,14 +142,14 @@ export default class EventPresenter {
     replace(updatedEventComponent, this.#eventEditFormComponent);
     remove(this.#eventEditFormComponent);
 
-    this.#eventComponent = updatedEventComponent; // Обновляем ссылку на компонент
+    this.#eventComponent = updatedEventComponent;
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 
   #escKeyDownHandler = (evt) => {
     if (isEscape(evt)) {
       evt.preventDefault();
-      this.#handleCloseClick(); // Закрытие без сохранения при ESC
+      this.#handleCloseClick();
     }
   };
 }

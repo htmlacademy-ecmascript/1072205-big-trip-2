@@ -28,7 +28,6 @@
 function generateFilter(events) {
   return FILTERS.map(({ type, filter }) => {
     const filteredEvents = filter(events);  // Фильтрация событий для каждого фильтра
-    console.log(`Фильтр: ${type}, событий: ${filteredEvents.length}`);
 
     return {
       type,
@@ -39,7 +38,6 @@ function generateFilter(events) {
     };
   });
 }
-
 
 export { generateFilter };
 

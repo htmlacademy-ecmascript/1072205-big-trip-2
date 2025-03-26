@@ -22,14 +22,13 @@ export default class NewEventPresenter {
 
   init() {
     this.#event = {
-      type: 'Flight', // По умолчанию тип "Flight"
+      type: 'Flight',
       destination: '',
       startDate: '',
       endDate: '',
       cost: 0,
       offers: [],
     };
-    console.log(this.#event);
 
     this.#eventEditFormComponent = new EventEditFormView({
       //event: this.#event,  // Убедитесь, что объект события передаётся
