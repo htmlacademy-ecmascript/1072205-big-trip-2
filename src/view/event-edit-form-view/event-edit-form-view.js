@@ -46,6 +46,9 @@ export default class EventEditFormView extends AbstractStatefulView {
     this.#setDatepickers();
     this.element.querySelector('.event__input--price')
   .addEventListener('input', this.#priceChangeHandler);
+  this.element.querySelector('.event__reset-btn')
+  .addEventListener('click', this.#handleCancelClick);
+
   }
 
   #priceChangeHandler = (evt) => {
@@ -53,6 +56,12 @@ export default class EventEditFormView extends AbstractStatefulView {
       basePrice: Number(evt.target.value) || 0, // Обновляем состояние без перерисовки
     });
   };
+
+  #handleCancelClick = (evt) => {
+    evt.preventDefault();
+    this.#handleEditClick(); // Используем уже существующий метод закрытия формы
+  };
+
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
