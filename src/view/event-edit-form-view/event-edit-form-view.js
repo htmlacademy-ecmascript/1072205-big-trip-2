@@ -7,13 +7,14 @@ import 'flatpickr/dist/flatpickr.min.css';
 const BLANK_EVENT = {
   id: '',
   basePrice: 0,
-  dateFrom: '',
-  dateTo: '',
+  dateFrom: null, // Используем null вместо пустой строки
+  dateTo: null,
   destination: '',
   isFavourite: false,
   offers: [],
   type: EVENT_TYPES[5],
 };
+
 
 export default class EventEditFormView extends AbstractStatefulView {
   #destinations = [];
@@ -43,14 +44,22 @@ export default class EventEditFormView extends AbstractStatefulView {
     this.element.querySelector('.event__type-group').addEventListener('change', this.#eventTypeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
     this.#setDatepickers();
+    this.element.querySelector('.event__input--price')
+  .addEventListener('input', this.#priceChangeHandler);
   }
+
+  #priceChangeHandler = (evt) => {
+    this._setState({
+      basePrice: Number(evt.target.value) || 0, // Обновляем состояние без перерисовки
+    });
+  };
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    console.log('Submitting form with state:', this._state); // Проверка данных перед отправкой
+    console.log(this._state);
     this.#handleFormSubmit(EventEditFormView.parseStateToEvent(this._state));
+    this.#handleEditClick();
   };
-
 
   #editClickHandler = (evt) => {
     evt.preventDefault();
@@ -132,12 +141,19 @@ export default class EventEditFormView extends AbstractStatefulView {
   }
 
   static parseEventToState(event) {
-    return { ...event };
+    return {
+      ...event,
+      basePrice: event.basePrice ?? 0, // Если undefined, заменяем на 0
+    };
   }
 
-  static parseStateToEvent(state) {
-    return { ...state };
-  }
+static parseStateToEvent(state) {
+  return {
+    ...state,
+    basePrice: Number(state.basePrice) || 0, // Преобразуем в число
+  };
+}
+
 
   getUpdatedEvent() {
     return {
@@ -149,4 +165,5 @@ export default class EventEditFormView extends AbstractStatefulView {
     super.updateElement(updatedState);
     this._restoreHandlers(); // Заново вешаем обработчики после обновления
   }
+
 }

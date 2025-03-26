@@ -9,6 +9,7 @@ import SortView from '../view/sort-view.js';
 import EventPresenter from './event-presenter.js';
 import NewEventPresenter from './new-event-presenter.js';
 
+
 export default class EventsListPresenter {
   #eventsModel = null;
   #destinationsModel = null;
@@ -57,6 +58,19 @@ export default class EventsListPresenter {
     });
   }
 
+  #handleFormSubmit = (updatedEvent) => {
+    console.log('Сохранение нового события:', updatedEvent);
+    this.#eventsModel.addEvent(UpdateType.MINOR, updatedEvent);
+
+    // Перерисовываем список
+    this.#clearEventList();
+    this.#renderEventList();
+
+    // Закрываем форму после сохранения
+    this.#closeNewEventForm();
+  };
+
+
   getEventPresenters() {
     return this.#eventPresenters;
   }
@@ -71,6 +85,9 @@ export default class EventsListPresenter {
     this.#currentFilterType = FILTERS[0].type;
     this.#currentSortType = SORTS[0].type;
 
+    this.#clearEventList();
+    this.#renderEventList();
+
     if (!this.#newEventPresenter) {
       this.#newEventPresenter = new NewEventPresenter({
         destinationsModel: this.#destinations,
@@ -81,22 +98,55 @@ export default class EventsListPresenter {
     }
 
     this.#newEventPresenter.init();
+    document.addEventListener('keydown', this.#handleEscKeyDown); // Добавляем обработчик Esc
+
+    const newEventButton = document.querySelector('.trip-main__event-add-btn');
+    newEventButton.setAttribute('disabled', 'true');
   };
 
   #handleDataChange = (actionType, updateType, updatedEvent) => {
     if (actionType === UserAction.ADD_EVENT) {
       this.#eventsModel.addEvent(updateType, updatedEvent);
       this.#events.push(updatedEvent);
+
+      // Перерисовываем список событий
       this.#clearEventList();
       this.#renderEventList();
+
+      // Закрываем форму создания события
+      this.#closeNewEventForm();
+    }
+  };
+
+
+  #handleEscKeyDown = (evt) => {
+    if (evt.key === 'Escape') {
+      evt.preventDefault();
+      this.#closeNewEventForm();
     }
   };
 
   #closeNewEventForm = () => {
-    this.#newEventPresenter = null;
-    const newEventButton = document.querySelector('.trip-controls__new-event-btn');
-    newEventButton.disabled = false;
+    if (this.#newEventPresenter) {
+      this.#newEventPresenter.destroy(); // Удаляем форму
+      this.#newEventPresenter = null;
+    }
+
+    document.removeEventListener('keydown', this.#handleEscKeyDown);
+
+    const newEventButton = document.querySelector('.trip-main__event-add-btn');
+    if (newEventButton) {
+      newEventButton.disabled = false;
+    }
+
+    // Перерисовываем список после закрытия формы
+    this.#clearEventList();
+    this.#renderEventList();
   };
+
+
+
+
 
 #renderFilters() {
   render(new FiltersView({

@@ -1,17 +1,13 @@
-import { render, replace, remove } from '../framework/render.js';
+import { render, remove, RenderPosition } from '../framework/render.js';
 import { UserAction, UpdateType } from '../const.js';
 import EventEditFormView from '../view/event-edit-form-view/event-edit-form-view.js';
-import EventView from '../view/event-view/event-view.js';
 
 export default class NewEventPresenter {
-  #event = null;
   #destinations = [];
   #offers = [];
   #onDataChange = null;
   #onCloseForm = null;
-
   #eventEditFormComponent = null;
-  #eventComponent = null;
 
   constructor({ destinationsModel, offersModel, onDataChange, onCloseForm }) {
     this.#destinations = destinationsModel;
@@ -21,34 +17,39 @@ export default class NewEventPresenter {
   }
 
   init() {
-    this.#event = {
-      type: 'Flight',
-      destination: '',
-      startDate: '',
-      endDate: '',
-      cost: 0,
-      offers: [],
-    };
-
     this.#eventEditFormComponent = new EventEditFormView({
-      //event: this.#event,  // Убедитесь, что объект события передаётся
-      destinations: this.#destinations,  // Пункты назначения
-      offers: this.#offers,  // Опции для события
-      // onFormSubmit: this.#handleFormSubmit,
-      // onEditClick: this.#handleCloseClick,
+      event: {
+        type: 'Flight',
+        destination: '',
+        startDate: '',
+        endDate: '',
+        cost: 0,
+        offers: [],
+      },
+      destinations: this.#destinations,
+      offers: this.#offers,
+      onFormSubmit: this.#formSubmitHandler, // Передаём исправленный метод
+      onEditClick: this.#handleCloseFormClick,
     });
 
-    render(this.#eventEditFormComponent, document.querySelector('.page-main .trip-events'));
+    render(this.#eventEditFormComponent, document.querySelector('.trip-events__list'), RenderPosition.AFTERBEGIN);
   }
 
-  #handleFormSubmit = (newEventData) => {
-    const updatedEvent = { ...this.#event, ...newEventData };
+  #formSubmitHandler = (updatedEvent) => {
     this.#onDataChange(UserAction.ADD_EVENT, UpdateType.MINOR, updatedEvent);
-    this.#handleCloseFormClick(); // Закрыть форму после сохранения
+    this.#handleCloseFormClick(); // Закрываем форму после сохранения
   };
 
   #handleCloseFormClick = () => {
-    this.#onCloseForm(); // Закрыть форму создания нового события
-    remove(this.#eventEditFormComponent); // Удалить форму из DOM
+    this.#onCloseForm();
+    remove(this.#eventEditFormComponent);
+    this.#eventEditFormComponent = null; // Очищаем ссылку, чтобы избежать багов
   };
+
+  destroy() {
+    if (this.#eventEditFormComponent) {
+      remove(this.#eventEditFormComponent);
+      this.#eventEditFormComponent = null;
+    }
+  }
 }
