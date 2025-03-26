@@ -65,10 +65,15 @@ export default class EventEditFormView extends AbstractStatefulView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    console.log(this._state);
-    this.#handleFormSubmit(EventEditFormView.parseStateToEvent(this._state));
-    this.#handleEditClick();
+
+    const selectedOffers = this._state.offers.filter((offer) => offer.checked); // Оставляем только отмеченные
+
+    this.#handleFormSubmit({
+      ...EventEditFormView.parseStateToEvent(this._state),
+      offers: selectedOffers, // Передаём только выбранные опции
+    });
   };
+
 
   #editClickHandler = (evt) => {
     evt.preventDefault();

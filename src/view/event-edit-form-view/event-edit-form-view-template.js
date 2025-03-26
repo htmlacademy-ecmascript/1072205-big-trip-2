@@ -147,6 +147,7 @@ function createEventEditFormTemplate(event, destinations, offersList) {
         <section class="event__details">
           ${createOffersContainerTemplate(offers, offersByType)}
 
+          ${destination ? `
           <section class="event__section  event__section--destination">
             <h3 class="event__section-title  event__section-title--destination">Destination</h3>
             <p class="event__destination-description">${destination ? destinationById.description : ''}</p>
@@ -157,6 +158,10 @@ function createEventEditFormTemplate(event, destinations, offersList) {
               </div>
             </div>
           </section>
+        ` : ''}
+
+
+
         </section>
       </form>
     </li>`
