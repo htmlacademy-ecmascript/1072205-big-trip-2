@@ -52,9 +52,8 @@ export default class EventEditFormView extends AbstractStatefulView {
   }
 
   #priceChangeHandler = (evt) => {
-    this._setState({
-      basePrice: Number(evt.target.value) || 0, // Обновляем состояние без перерисовки
-    });
+    evt.target.value = evt.target.value.replace(/\D/g, ''); // Удаляем все нечисловые символы
+    this._setState({ basePrice: Number(evt.target.value) || 0 });
   };
 
   #handleCancelClick = (evt) => {
@@ -93,6 +92,8 @@ export default class EventEditFormView extends AbstractStatefulView {
     const selectedDestination = this.#destinations.find((dest) => dest.name === evt.target.value);
     if (selectedDestination) {
       this.updateElement({ destination: selectedDestination.id });
+    } else {
+      evt.target.value = ''; // Очищаем поле, если значение некорректно
     }
   };
 
