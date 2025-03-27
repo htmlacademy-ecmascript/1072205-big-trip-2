@@ -31,8 +31,8 @@ function createSortTemplate(sortItems, onSortChange) {
 
 export default class SortView extends AbstractView {
   #sorts = null;
-  #onSortChange = null;
   #currentSortType = null;
+  #onSortChange = null;
 
   constructor({ sorts, onSortChange }) {
     super();
@@ -42,18 +42,6 @@ export default class SortView extends AbstractView {
     this.element.addEventListener('click', this.#handleSortClick);
   }
 
-  #handleSortClick = (evt) => {
-    const sortType = evt.target.dataset.sortType;
-    console.log('Клик по сортировке:', sortType); // Отладка
-
-    if (!sortType || sortType === this.#currentSortType) {
-      return;
-    }
-
-    this.#currentSortType = sortType; // ✅ Сохраняем текущий тип сортировки
-    this.#onSortChange(sortType);
-  };
-
   get template() {
     return createSortTemplate(this.#sorts, this.#onSortChange);
   }
@@ -62,8 +50,19 @@ export default class SortView extends AbstractView {
     this.element.querySelectorAll('.trip-sort__input').forEach((input) => {
       input.addEventListener('change', (evt) => {
         const sortType = evt.target.dataset.sortType;
-        this.#onSortChange(sortType); // вызываем переданный callback
+        this.#onSortChange(sortType);
       });
     });
   }
+
+  #handleSortClick = (evt) => {
+    const sortType = evt.target.dataset.sortType;
+
+    if (!sortType || sortType === this.#currentSortType) {
+      return;
+    }
+
+    this.#currentSortType = sortType;
+    this.#onSortChange(sortType);
+  };
 }

@@ -8,12 +8,14 @@ function createEventDestinationsList(destinations) {
   ).join('');
 }
 
-function createOffersTemplate(offers, offersByType) {
-  const ids = offersByType.map((offer) => offer.id);
-
-  return offers && offers.map((offer) =>
+function createOffersTemplate(offers) {
+  return offers.map((offer) =>
     `<div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id="${offer.id}" type="checkbox" name="${offer.title}" ${ids.includes(offer.id) ? 'checked' : ''}>
+      <input class="event__offer-checkbox visually-hidden"
+        id="${offer.id}"
+        type="checkbox"
+        name="${offer.title}"
+        ${ offer.isChecked ? 'checked' : ''}>
       <label class="event__offer-label" for="${offer.id}">
         <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
@@ -23,13 +25,12 @@ function createOffersTemplate(offers, offersByType) {
   ).join('');
 }
 
-function createOffersContainerTemplate(offers, offersByType) {
-  return offers.length ? (
-    `<section class="event__section  event__section--offers">
-      <h3 class="event__section-title  event__section-title--offers">Offers</h3>
-
+function createOffersContainerTemplate(offersByType) {
+  return offersByType.length ? (
+    `<section class="event__section event__section--offers">
+      <h3 class="event__section-title event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
-        ${createOffersTemplate(offers, offersByType)}
+        ${createOffersTemplate(offersByType)}
       </div>
     </section>`
   ) : '';
@@ -47,7 +48,6 @@ function createEventEditFormTemplate(event, destinations, offersList) {
   const endTime = humanizeDate(dateTo, EDIT_FORM_DATE_FORMAT).date + humanizeDate(dateTo).time;
   const destinationById = destinations.find((dest) => dest.id === destination);
   const offersByType = offersList.find((offer) => offer.type.toLowerCase() === type.toLowerCase())?.offers ?? [];
-  console.log(basePrice);
 
   return (
     `<li class="trip-events__item">
@@ -116,7 +116,7 @@ function createEventEditFormTemplate(event, destinations, offersList) {
             <label class="event__label  event__type-output" for="event-destination-1">
               ${type}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination ? destinationById.name : ''}" list="destination-list-1">
+            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination ? destinationById.name : ''}" list="destination-list-1"  required>
             <datalist id="destination-list-1">
               ${createEventDestinationsList(destinations)}
             </datalist>
@@ -135,17 +135,17 @@ function createEventEditFormTemplate(event, destinations, offersList) {
               <span class="visually-hidden">Price</span>
               &euro;
             </label>
-            <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${basePrice}" min="0">
+            <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${basePrice}" min="1">
           </div>
 
           <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-          <button class="event__reset-btn" type="reset">Cancel</button>
+          <button class="event__reset-btn" type="reset">${destination ? 'Delete' : 'Cancel'}</button>
           <button class="event__rollup-btn" type="button">
             <span class="visually-hidden">Open event</span>
           </button>
         </header>
         <section class="event__details">
-          ${createOffersContainerTemplate(offers, offersByType)}
+          ${createOffersContainerTemplate(offersByType)}
 
           ${destination ? `
           <section class="event__section  event__section--destination">
@@ -159,9 +159,6 @@ function createEventEditFormTemplate(event, destinations, offersList) {
             </div>
           </section>
         ` : ''}
-
-
-
         </section>
       </form>
     </li>`

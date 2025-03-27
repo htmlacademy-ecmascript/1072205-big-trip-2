@@ -9,36 +9,27 @@ function createTripInfoTemplate(events, destinations, offers) {
   }
 
   const destinationNames = events.map((event) => destinations.find((dest) => dest.id === event.destination).name);
-  const tripInfoTitle = destinationNames.join(' &mdash; ');
+  const tripInfoTitle =
+    destinationNames.length > 3
+    ? destinationNames[0] + ' &mdash; ... &mdash; ' + destinationNames[destinationNames.length - 1]
+    : destinationNames.join(' &mdash; ');
 
   const tripStartTime = Math.min(...events.map((event) => event.dateFrom));
   const tripEndTime = Math.max(...events.map((event) => event.dateTo));
 
-  console.log('Events:', events);
-console.log('Offers:', offers);
-events.forEach((event) => {
-  console.log(`Event: ${event.type}, Base price: ${event.basePrice}, Offers:`, event.offers);
-});
-const totalCost = events.reduce((sum, event) => {
+  const totalCost = events.reduce((sum, event) => {
   let eventCost = event.basePrice;
 
-  console.log(`Processing event: ${event.type}, Base price: ${event.basePrice}`);
-
   if (Array.isArray(event.offers) && event.offers.length > 0) {
-    // Сразу прибавляем стоимость всех офферов события
     const selectedOffersCost = event.offers.reduce((offerSum, offer) => {
-      console.log(`Adding offer price: ${offer.price} for offer: ${offer.title}`);
       return offerSum + offer.price;
     }, 0);
 
     eventCost += selectedOffersCost;
   }
 
-  console.log(`Final cost for event ${event.type}: ${eventCost}`);
   return sum + eventCost;
 }, 0);
-
-
 
   return (
     `<section class="trip-main__trip-info  trip-info">
@@ -55,7 +46,6 @@ const totalCost = events.reduce((sum, event) => {
     </section>`
   );
 }
-
 
 export default class TripInfoView extends AbstractView {
   #events;

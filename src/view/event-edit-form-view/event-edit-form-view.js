@@ -7,14 +7,13 @@ import 'flatpickr/dist/flatpickr.min.css';
 const BLANK_EVENT = {
   id: '',
   basePrice: 0,
-  dateFrom: null, // Используем null вместо пустой строки
+  dateFrom: null,
   dateTo: null,
   destination: '',
   isFavourite: false,
   offers: [],
   type: EVENT_TYPES[5],
 };
-
 
 export default class EventEditFormView extends AbstractStatefulView {
   #destinations = [];
@@ -48,7 +47,8 @@ export default class EventEditFormView extends AbstractStatefulView {
   .addEventListener('input', this.#priceChangeHandler);
   this.element.querySelector('.event__reset-btn')
   .addEventListener('click', this.#handleCancelClick);
-
+  this.element.querySelectorAll('.event__offer-checkbox').forEach((checkbox) =>
+  checkbox.addEventListener('change', this.#offerChangeHandler))
   }
 
   #priceChangeHandler = (evt) => {
@@ -58,35 +58,47 @@ export default class EventEditFormView extends AbstractStatefulView {
 
   #handleCancelClick = (evt) => {
     evt.preventDefault();
-    this.#handleEditClick(); // Используем уже существующий метод закрытия формы
+    this.#handleEditClick(EventEditFormView.parseStateToEvent(this._state));
   };
-
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
 
-    const selectedOffers = this._state.offers.filter((offer) => offer.checked); // Оставляем только отмеченные
+    // const selectedOffers = Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked'))
+    //   .map((input) => this._state.offers.find((offer) => offer.id === input.id));
 
-    this.#handleFormSubmit({
+    const selectedOffers = Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked'))
+  .map((input) => {
+    const offerType = this.#offers.find((offer) => offer.type === this._state.type);
+    return offerType ? offerType.offers.find((offer) => offer.id === input.id) : null;
+  })
+  .filter(Boolean); // Исключаем `null` значения
+
+
+    const updatedEvent = {
       ...EventEditFormView.parseStateToEvent(this._state),
-      offers: selectedOffers, // Передаём только выбранные опции
-    });
-  };
+      offers: selectedOffers, // Передаём только выбранные офферы
+    };
 
+    this.#handleFormSubmit(updatedEvent);
+  };
 
   #editClickHandler = (evt) => {
     evt.preventDefault();
+    this.updateElement({ offers: this._state.offers }); // Обновляем состояние перед закрытием
     this.#handleEditClick();
   };
 
   #eventTypeChangeHandler = (evt) => {
     const newType = evt.target.value;
     const newOffersByType = this.#offers.find((offer) => offer.type.toLowerCase() === newType.toLowerCase())?.offers ?? [];
+
     this.updateElement({
       type: newType,
-      offers: newOffersByType,
+      offers: newOffersByType.filter((offer) => offer.checked), // Оставляем только выбранные
     });
   };
+
 
   #destinationChangeHandler = (evt) => {
     const selectedDestination = this.#destinations.find((dest) => dest.name === evt.target.value);
@@ -162,23 +174,31 @@ export default class EventEditFormView extends AbstractStatefulView {
     };
   }
 
+#offerChangeHandler = (evt) => {
+  const offerId = evt.target.dataset.offerId;
+  this._setState({
+    offers: this._state.offers.map((offer) =>
+      offer.id === offerId ? { ...offer, checked: evt.target.checked } : offer
+    ),
+  });
+};
+
 static parseStateToEvent(state) {
   return {
     ...state,
-    basePrice: Number(state.basePrice) || 0, // Преобразуем в число
+    basePrice: Number(state.basePrice) || 0,
+    offers: state.offers.map((offer) => ({ id: offer.id, title: offer.title, price: offer.price })),
   };
 }
 
+getUpdatedEvent() {
+  return {
+    ...this._state,
+  };
+}
 
-  getUpdatedEvent() {
-    return {
-      ...this._state,
-    };
-  }
-
-  updateElement(updatedState) {
-    super.updateElement(updatedState);
-    this._restoreHandlers(); // Заново вешаем обработчики после обновления
-  }
-
+updateElement(updatedState) {
+  super.updateElement(updatedState);
+  this._restoreHandlers(); // Заново вешаем обработчики после обновления
+}
 }

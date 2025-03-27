@@ -5,20 +5,21 @@ const EVENT_DATE_FORMAT = 'MMM DD';
 function createEventOffersTemplate(offers) {
   return offers && offers.map((offer) =>
     `<li class="event__offer">
-      <span class="event__offer-title">${offer.title}</span>
-      &plus;&euro;&nbsp;
-      <span class="event__offer-price">${offer.price}</span>
+      <span class="event__offer-title">${offer.isChecked ? offer.title : ''}</span>
+      ${offer.isChecked ? '&plus;&euro;&nbsp;' : ''}
+      <span class="event__offer-price">${offer.isChecked ? offer.price : ''}</span>
     </li>`
   ).join('');
 }
 
-function createEventTemplate(event, destinations) {
+function createEventTemplate(event, destinations, offersList) {
   const {basePrice, dateFrom, dateTo, destination, offers, type, isFavorite } = event;
   const date = humanizeDate(dateFrom, EVENT_DATE_FORMAT).date;
   const startTime = humanizeDate(dateFrom).time;
   const endTime = humanizeDate(dateTo).time;
   const duration = Object.entries(eventDuration(dateFrom, dateTo)).map((item) => item[1]).join('\n');
   const destinationById = destinations.find((dest) => dest.id === destination).name;
+  const offersByType = offersList.find((offer) => offer.type.toLowerCase() === type.toLowerCase())?.offers ?? [];
 
   return (
     `<li class="trip-events__item">
@@ -41,7 +42,7 @@ function createEventTemplate(event, destinations) {
         </p>
         <h4 class="visually-hidden">Offers:</h4>
         <ul class="event__selected-offers">
-          ${createEventOffersTemplate(offers)}
+          ${createEventOffersTemplate(offersByType)}
         </ul>
         <button class="event__favorite-btn ${isEventFavorite(isFavorite)}" type="button">
           <span class="visually-hidden">Add to favorite</span>

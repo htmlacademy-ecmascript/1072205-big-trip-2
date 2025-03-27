@@ -9,7 +9,6 @@ import SortView from '../view/sort-view.js';
 import EventPresenter from './event-presenter.js';
 import NewEventPresenter from './new-event-presenter.js';
 
-
 export default class EventsListPresenter {
   #eventsModel = null;
   #destinationsModel = null;
@@ -59,7 +58,6 @@ export default class EventsListPresenter {
   }
 
   #handleFormSubmit = (updatedEvent) => {
-    console.log('Сохранение нового события:', updatedEvent);
     this.#eventsModel.addEvent(UpdateType.MINOR, updatedEvent);
 
     // Перерисовываем список
@@ -144,16 +142,34 @@ export default class EventsListPresenter {
     this.#renderEventList();
   };
 
-
-
-
-
 #renderFilters() {
+  const filters = generateFilter(this.#events).map(filter => ({
+    ...filter,
+    isDisabled: this.filteredEventsByType(filter.type).length === 0
+  }));
+
   render(new FiltersView({
-    filters: generateFilter(this.#events),
+    filters,
     currentFilterType: this.#currentFilterType,
     onFilterChange: this.#handleFilterChange
   }), this.#filtersElement);
+}
+
+filteredEventsByType(filterType) {
+  return this.#events.filter(event => {
+    switch (filterType) {
+      case 'everything':
+        return true;
+      case 'future':
+        return event.dateFrom > new Date();
+      case 'present':
+        return event.dateFrom <= new Date() && event.dateTo >= new Date();
+      case 'past':
+        return event.dateTo < new Date();
+      default:
+        return true;
+    }
+  });
 }
 
 #renderSort() {
@@ -167,12 +183,12 @@ export default class EventsListPresenter {
 #renderEventList() {
   const filteredEvents = this.filteredEvents;
 
-  render(this.#eventListComponent, this.#tripEventElement);
-
   if (filteredEvents.length === 0) {
-    this.#renderEmptyMessage();
+    document.querySelector(`#filter-${this.#currentFilterType}`).setAttribute('disabled', 'true');
     return;
   }
+
+  render(this.#eventListComponent, this.#tripEventElement);
 
   filteredEvents
   .sort((a, b) => {
@@ -181,17 +197,6 @@ export default class EventsListPresenter {
   })
   .forEach((event) => this.#renderEvent(event)); // Рендерим отфильтрованные события
 }
-
-#renderEmptyMessage() {
-  const message = {
-    'everything': 'There are no events now',
-    'future': 'There are no future events now',
-      'present': 'There are no present events now',
-      'past': 'There are no past events now'
-    }[this.#currentFilterType];
-
-    this.#eventListComponent.element.innerHTML = `<p class="trip-events__msg">${message}</p>`;
-  }
 
   #renderEvent(event) {
     const eventPresenter = new EventPresenter(
@@ -229,18 +234,16 @@ export default class EventsListPresenter {
   }
 
   get filteredEvents() {
-    const events = this.#events;
-
-    return events.filter(event => {
+    return this.#events.filter(event => {
       switch (this.#currentFilterType) {
         case 'everything':
           return true; // Все события
         case 'future':
-          return dayjs(event.startDate).isAfter(dayjs()); // Только будущие
+          return event.dateFrom > new Date();
         case 'present':
-          return dayjs(event.startDate).isBefore(dayjs()) && dayjs(event.endDate).isAfter(dayjs()); // Только текущие
+          return event.dateFrom <= new Date() && event.dateTo >= new Date();
         case 'past':
-          return dayjs(event.endDate).isBefore(dayjs()); // Только прошедшие
+          return event.dateTo < new Date();
         default:
           return true;
       }
