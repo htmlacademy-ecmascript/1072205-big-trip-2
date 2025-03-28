@@ -46,13 +46,11 @@ export default class EventsListPresenter {
     document.querySelector('.trip-main__event-add-btn').addEventListener('click', this.#handleNewEventClick);
   }
 
-  _handleModelUpdate = (event, payload) => {
-    console.log(`Received event: ${event}`, payload);
-    if (event === 'eventDeleted') {
-      this.#reRenderEventList();  // Обновление списка событий
+  _handleModelUpdate = (event) => {
+    if (event === 'DELETE_EVENT') {
+      this.#reRenderEventList();
     }
   }
-
 
   get filteredEvents() {
     return this.#events.filter(event => this.#applyFilter(event, this.#currentFilterType));
@@ -100,10 +98,8 @@ export default class EventsListPresenter {
       this.#eventsModel.deleteEvent(updateType, updatedEvent);
       this.#events = this.#events.filter(event => event.id !== updatedEvent.id);
     }
-    this.#reRenderEventList(); // Обновление списка событий
+    this.#reRenderEventList();
   };
-
-
 
   #handleEscKeyDown = (evt) => {
     if (evt.key === 'Escape') {
@@ -200,4 +196,7 @@ export default class EventsListPresenter {
     this.#renderEventList();
   }
 
+  getEventPresenters() {
+    return this.#eventPresenters || [];
+  }
 }
