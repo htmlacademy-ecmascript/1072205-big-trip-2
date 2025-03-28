@@ -14,12 +14,14 @@ export default class EventPresenter {
   #eventEditFormComponent = null;
   #onDataChange = null;
   #onResetView = null;
-renderEventList = null;  // Храним ссылку на renderEventList
+  renderEventList = null;
   static #currentlyEditing = null;
+  #eventsModel = null;
 
-  constructor(container, renderEventList) {
+  constructor(container, renderEventList, eventsModel) {
     this.#tripEventsListElement = container;
-    this.renderEventList = renderEventList; // Сохраняем переданный метод
+    this.renderEventList = renderEventList;
+    this.#eventsModel = eventsModel;  // Инициализируем модель
   }
 
   init(event, eventsModel, destinationsModel, offersModel, onDataChange, onResetView) {
@@ -33,13 +35,12 @@ renderEventList = null;  // Храним ссылку на renderEventList
     this.#offers = offersModel;
     this.#onDataChange = onDataChange;
     this.#onResetView = onResetView;
-
     const prevEventComponent = this.#eventComponent;
     const prevEventEditComponent = this.#eventEditFormComponent;
 
     this.#eventComponent = new EventView({
       event: this.#event,
-      events: this.events,
+      events: this.#events,
       destinations: this.#destinations,
       offers: this.#offers,
       onEditClick: this.#handleEditClick,
@@ -52,7 +53,7 @@ renderEventList = null;  // Храним ссылку на renderEventList
       offers: this.#offers,
       onFormSubmit: this.#handleFormSubmit,
       onEditClick: this.#handleCloseClick,
-      onDeleteClick: this.#handleDeleteClick,
+      onDeleteClick: this.#handleDeleteClick, 
     });
 
     if (prevEventComponent && prevEventEditComponent) {
@@ -103,13 +104,20 @@ renderEventList = null;  // Храним ссылку на renderEventList
 
   #handleFormSubmit = (updatedEvent) => {
     this.#event = { ...this.#event, ...updatedEvent };
-    this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, this.#event);
+    this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, updatedEvent);
     this.#replaceFormToItem();
   };
 
   #handleDeleteClick = () => {
-    this.#onDataChange(UserAction.DELETE_EVENT, UpdateType.MINOR, this.#event);
-    this.#replaceFormToItem();
+    console.log('Delete button clicked in EventPresenter');
+    this.#onDataChange(UserAction.DELETE_EVENT, UpdateType.MINOR, this.#event); // Вызываем обработчик удаления
+    this.destroy(); // Удаляем компонент из DOM
+  };
+
+  _onDataChange = (updateType, userAction, event) => {
+    if (userAction === UserAction.DELETE_EVENT) {
+      this.#eventsModel.deleteEvent(updateType, event); // Удаляем событие из модели
+    }
   };
 
   #handleCloseClick = () => {

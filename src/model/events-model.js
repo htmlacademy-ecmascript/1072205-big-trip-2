@@ -11,9 +11,9 @@ export default class EventsModel extends Observable {
   }
 
   updateEvent(updateType, update) {
-    const index = this.events.findIndex(event => event.id === update.id);
+    const index = this.#events.findIndex(event => event.id === update.id);
     if (index !== -1) {
-      this.events[index] = update;
+      this.#events[index] = update;
       this._notify(updateType, update);
     }
   }
@@ -24,10 +24,10 @@ export default class EventsModel extends Observable {
   }
 
   deleteEvent(updateType, updatedEvent) {
-    const index = this.events.findIndex((event) => event.id === updatedEvent.id);
+    const index = this.#events.findIndex(event => event.id === updatedEvent.id);
     if (index !== -1) {
-      this.events.splice(index, 1); // Удаляем событие из массива
+      this.#events.splice(index, 1); // Удаляем событие
+      this._notify(updateType, updatedEvent); // Уведомляем
     }
-    this._notify(updateType);
   }
 }

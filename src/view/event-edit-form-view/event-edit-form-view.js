@@ -180,6 +180,11 @@ export default class EventEditFormView extends AbstractStatefulView {
 
   #deleteClickHandler = (evt) => {
     evt.preventDefault();
+    if (!this.#handleDeleteClick) {
+      console.error("Delete handler is missing!");
+      return;
+    }
+    this.#handleDeleteClick();
   };
 
   #editClickHandler = (evt) => {

@@ -28,6 +28,7 @@ export default class EventsListPresenter {
     this.#eventsModel = eventsModel;
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
+    this.#eventsModel.addObserver(this._handleModelUpdate);
   }
 
   init() {
@@ -42,9 +43,16 @@ export default class EventsListPresenter {
     this.#renderSort();
     this.#renderEventList();
 
-    document.querySelector('.trip-main__event-add-btn')
-      .addEventListener('click', this.#handleNewEventClick);
+    document.querySelector('.trip-main__event-add-btn').addEventListener('click', this.#handleNewEventClick);
   }
+
+  _handleModelUpdate = (event, payload) => {
+    console.log(`Received event: ${event}`, payload);
+    if (event === 'eventDeleted') {
+      this.#reRenderEventList();  // Обновление списка событий
+    }
+  }
+
 
   get filteredEvents() {
     return this.#events.filter(event => this.#applyFilter(event, this.#currentFilterType));
@@ -92,8 +100,10 @@ export default class EventsListPresenter {
       this.#eventsModel.deleteEvent(updateType, updatedEvent);
       this.#events = this.#events.filter(event => event.id !== updatedEvent.id);
     }
-    this.#reRenderEventList();
+    this.#reRenderEventList(); // Обновление списка событий
   };
+
+
 
   #handleEscKeyDown = (evt) => {
     if (evt.key === 'Escape') {
@@ -143,10 +153,16 @@ export default class EventsListPresenter {
     const eventPresenter = new EventPresenter(
       this.#tripEventElement.querySelector('.trip-events__list'),
       this.#reRenderEventList,
+      this.#eventsModel
     );
     eventPresenter.init(event, this.#eventsModel, this.#destinations, this.#offers, this.#resetEventViews, this.#handleViewAction);
     this.#eventPresenters.set(event.id, eventPresenter);
   }
+  _onDataChange = (updateType, userAction, event) => {
+    if (userAction === UserAction.DELETE_EVENT) {
+      this.#eventsModel.deleteEvent(updateType, event);  // Убедитесь, что event здесь правильно передается
+    }
+  };
 
   #handleViewAction = (actionType, updateType, update) => {
     if (actionType === UserAction.UPDATE_EVENT) {
@@ -177,8 +193,11 @@ export default class EventsListPresenter {
     this.#eventListComponent.clear();
   }
 
+
   #reRenderEventList() {
+    console.log('Re-rendering event list...');
     this.#clearEventList();
     this.#renderEventList();
   }
+
 }
