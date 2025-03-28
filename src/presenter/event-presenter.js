@@ -6,28 +6,29 @@ import EventView from '../view/event-view/event-view.js';
 
 export default class EventPresenter {
   #event = null;
+  #events = [];
   #destinations = [];
   #offers = [];
   #tripEventsListElement = null;
-
   #eventComponent = null;
   #eventEditFormComponent = null;
-
   #onDataChange = null;
   #onResetView = null;
-
+renderEventList = null;  // Храним ссылку на renderEventList
   static #currentlyEditing = null;
 
-  constructor(container) {
+  constructor(container, renderEventList) {
     this.#tripEventsListElement = container;
+    this.renderEventList = renderEventList; // Сохраняем переданный метод
   }
 
-  init(event, destinationsModel, offersModel, onDataChange, onResetView) {
+  init(event, eventsModel, destinationsModel, offersModel, onDataChange, onResetView) {
     if (!this.#tripEventsListElement) {
       this.#tripEventsListElement = document.querySelector('.trip-events__list');
     }
 
     this.#event = event;
+    this.#events = eventsModel;
     this.#destinations = destinationsModel;
     this.#offers = offersModel;
     this.#onDataChange = onDataChange;
@@ -38,6 +39,7 @@ export default class EventPresenter {
 
     this.#eventComponent = new EventView({
       event: this.#event,
+      events: this.events,
       destinations: this.#destinations,
       offers: this.#offers,
       onEditClick: this.#handleEditClick,
@@ -50,6 +52,7 @@ export default class EventPresenter {
       offers: this.#offers,
       onFormSubmit: this.#handleFormSubmit,
       onEditClick: this.#handleCloseClick,
+      onDeleteClick: this.#handleDeleteClick,
     });
 
     if (prevEventComponent && prevEventEditComponent) {
@@ -92,6 +95,7 @@ export default class EventPresenter {
     if (EventPresenter.#currentlyEditing) {
       EventPresenter.#currentlyEditing.resetView();
     }
+
     EventPresenter.#currentlyEditing = this;
     this.#onResetView();
     this.#replaceItemToForm();
@@ -100,6 +104,11 @@ export default class EventPresenter {
   #handleFormSubmit = (updatedEvent) => {
     this.#event = { ...this.#event, ...updatedEvent };
     this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, this.#event);
+    this.#replaceFormToItem();
+  };
+
+  #handleDeleteClick = () => {
+    this.#onDataChange(UserAction.DELETE_EVENT, UpdateType.MINOR, this.#event);
     this.#replaceFormToItem();
   };
 
@@ -118,6 +127,7 @@ export default class EventPresenter {
       offers: this.#offers,
       onFormSubmit: this.#handleFormSubmit,
       onEditClick: this.#handleCloseClick,
+      onDeleteClick: this.#handleDeleteClick,
     });
 
     replace(this.#eventEditFormComponent, this.#eventComponent);

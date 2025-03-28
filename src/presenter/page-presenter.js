@@ -40,6 +40,13 @@ export default class PagePresenter {
     this.#renderEventList();
   }
 
+  updateEvent(updatedEvent) {
+    this.#events = this.#events.map((event) =>
+      event.id === updatedEvent.id ? updatedEvent : event
+    );
+    this.#eventPresenters.get(updatedEvent.id)?.update(updatedEvent);
+  }
+
   #renderNoEvent() {
     if (this.#events.length === 0) {
       render(new NoEventView(), this.#tripEventElement);
@@ -63,12 +70,5 @@ export default class PagePresenter {
     this.#eventListPresenter.init();
 
     this.#eventPresenters = this.#eventListPresenter.getEventPresenters();
-  }
-
-  updateEvent(updatedEvent) {
-    this.#events = this.#events.map((event) =>
-      event.id === updatedEvent.id ? updatedEvent : event
-    );
-    this.#eventPresenters.get(updatedEvent.id)?.update(updatedEvent);
   }
 }

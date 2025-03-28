@@ -20,9 +20,9 @@ export default class EventEditFormView extends AbstractStatefulView {
   #offers = [];
   #handleFormSubmit = null;
   #handleEditClick = null;
-  #handleDeleteClick = null;
   #datepickerStart = null;
   #datepickerEnd = null;
+  #handleDeleteClick = null;
 
   constructor({ event = BLANK_EVENT, destinations, offers, onFormSubmit, onEditClick, onDeleteClick }) {
     super();
@@ -31,7 +31,7 @@ export default class EventEditFormView extends AbstractStatefulView {
     this.#offers = offers;
     this.#handleFormSubmit = onFormSubmit;
     this.#handleEditClick = onEditClick;
-    this.#handleDeleteClick = onDeleteClick; // Добавляем обработчик удаления
+    this.#handleDeleteClick = onDeleteClick;
     this._restoreHandlers();
   }
 
@@ -178,10 +178,8 @@ export default class EventEditFormView extends AbstractStatefulView {
     this.#handleEditClick(EventEditFormView.parseStateToEvent(this._state));
   };
 
-  #deleteClickHandler  = (evt) => {
+  #deleteClickHandler = (evt) => {
     evt.preventDefault();
-    this.#handleDeleteClick(this._state.id); // Передаем ID в обработчик
-    this.removeElement(); // Удаляем форму из DOM
   };
 
   #editClickHandler = (evt) => {

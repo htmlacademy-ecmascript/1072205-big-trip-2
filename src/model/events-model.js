@@ -23,8 +23,11 @@ export default class EventsModel extends Observable {
     this._notify(updateType, newEvent);
   }
 
-  deleteEvent(updateType, eventToDelete) {
-    this.#events = this.#events.filter((event) => event.id !== eventToDelete.id);
-    this._notify(updateType, eventToDelete);
+  deleteEvent(updateType, updatedEvent) {
+    const index = this.events.findIndex((event) => event.id === updatedEvent.id);
+    if (index !== -1) {
+      this.events.splice(index, 1); // Удаляем событие из массива
+    }
+    this._notify(updateType);
   }
 }
