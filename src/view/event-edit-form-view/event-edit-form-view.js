@@ -20,16 +20,18 @@ export default class EventEditFormView extends AbstractStatefulView {
   #offers = [];
   #handleFormSubmit = null;
   #handleEditClick = null;
+  #handleDeleteClick = null;
   #datepickerStart = null;
   #datepickerEnd = null;
 
-  constructor({ event = BLANK_EVENT, destinations, offers, onFormSubmit, onEditClick }) {
+  constructor({ event = BLANK_EVENT, destinations, offers, onFormSubmit, onEditClick, onDeleteClick }) {
     super();
     this._state = EventEditFormView.parseEventToState(event);
     this.#destinations = destinations;
     this.#offers = offers;
     this.#handleFormSubmit = onFormSubmit;
     this.#handleEditClick = onEditClick;
+    this.#handleDeleteClick = onDeleteClick; // Добавляем обработчик удаления
     this._restoreHandlers();
   }
 
@@ -37,77 +39,16 @@ export default class EventEditFormView extends AbstractStatefulView {
     return createEventEditFormTemplate(this._state, this.#destinations, this.#offers);
   }
 
-  _restoreHandlers() {
-    this.element.querySelector('.event--edit').addEventListener('submit', this.#formSubmitHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
-    this.element.querySelector('.event__type-group').addEventListener('change', this.#eventTypeChangeHandler);
-    this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
-    this.#setDatepickers();
-    this.element.querySelector('.event__input--price')
-  .addEventListener('input', this.#priceChangeHandler);
-  this.element.querySelector('.event__reset-btn')
-  .addEventListener('click', this.#handleCancelClick);
-  this.element.querySelectorAll('.event__offer-checkbox').forEach((checkbox) =>
-  checkbox.addEventListener('change', this.#offerChangeHandler))
+  getUpdatedEvent() {
+    return {
+      ...this._state,
+    };
   }
 
-  #priceChangeHandler = (evt) => {
-    evt.target.value = evt.target.value.replace(/\D/g, ''); // Удаляем все нечисловые символы
-    this._setState({ basePrice: Number(evt.target.value) || 0 });
-  };
-
-  #handleCancelClick = (evt) => {
-    evt.preventDefault();
-    this.#handleEditClick(EventEditFormView.parseStateToEvent(this._state));
-  };
-
-  #formSubmitHandler = (evt) => {
-    evt.preventDefault();
-
-    // const selectedOffers = Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked'))
-    //   .map((input) => this._state.offers.find((offer) => offer.id === input.id));
-
-    const selectedOffers = Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked'))
-  .map((input) => {
-    const offerType = this.#offers.find((offer) => offer.type === this._state.type);
-    return offerType ? offerType.offers.find((offer) => offer.id === input.id) : null;
-  })
-  .filter(Boolean); // Исключаем `null` значения
-
-
-    const updatedEvent = {
-      ...EventEditFormView.parseStateToEvent(this._state),
-      offers: selectedOffers, // Передаём только выбранные офферы
-    };
-
-    this.#handleFormSubmit(updatedEvent);
-  };
-
-  #editClickHandler = (evt) => {
-    evt.preventDefault();
-    this.updateElement({ offers: this._state.offers }); // Обновляем состояние перед закрытием
-    this.#handleEditClick();
-  };
-
-  #eventTypeChangeHandler = (evt) => {
-    const newType = evt.target.value;
-    const newOffersByType = this.#offers.find((offer) => offer.type.toLowerCase() === newType.toLowerCase())?.offers ?? [];
-
-    this.updateElement({
-      type: newType,
-      offers: newOffersByType.filter((offer) => offer.checked), // Оставляем только выбранные
-    });
-  };
-
-
-  #destinationChangeHandler = (evt) => {
-    const selectedDestination = this.#destinations.find((dest) => dest.name === evt.target.value);
-    if (selectedDestination) {
-      this.updateElement({ destination: selectedDestination.id });
-    } else {
-      evt.target.value = ''; // Очищаем поле, если значение некорректно
-    }
-  };
+  updateElement(updatedState) {
+    super.updateElement(updatedState);
+    this._restoreHandlers();
+  }
 
   removeElement() {
     super.removeElement();
@@ -121,22 +62,38 @@ export default class EventEditFormView extends AbstractStatefulView {
     }
   }
 
-  #dateFromChangeHandler = ([userDate]) => {
-    this.updateElement({ dateFrom: userDate });
-    this.#datepickerEnd.set('minDate', userDate);
-    if (new Date(this._state.dateTo) < userDate) {
-      this.updateElement({ dateTo: userDate });
-      this.#datepickerEnd.setDate(userDate);
-    }
+  _restoreHandlers() {
+    const resetButton = this.element.querySelector('.event__reset-btn');
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#eventTypeChangeHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
+    this.#setDatepickers();
+    this.element.querySelector('.event__input--price').addEventListener('input', this.#priceChangeHandler);
+    this.element.querySelectorAll('.event__offer-checkbox').forEach((checkbox) => checkbox.addEventListener('change', this.#offersChangeHandler));
+    this.element.querySelector('.event--edit').addEventListener('submit', this.#formSubmitHandler);
+    (resetButton.innerHTML === 'Cancel') && (this.element.querySelector('.event__reset-btn').addEventListener('click', this.#handleCancelClick));
+    (resetButton.innerHTML === 'Delete') && (this.element.querySelector('.event__reset-btn').addEventListener('click', this.#deleteClickHandler));
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
+  }
+
+  #eventTypeChangeHandler = (evt) => {
+    const newType = evt.target.value;
+    const newOffersByType = this.#offers.find((offer) => offer.type.toLowerCase() === newType.toLowerCase())?.offers ?? [];
+
+    this.updateElement({
+      type: newType,
+      offers: newOffersByType.filter((offer) => offer.checked),
+    });
   };
 
-  #dateToChangeHandler = ([userDate]) => {
-    if (new Date(userDate) < new Date(this._state.dateFrom)) {
-      this.#datepickerEnd.setDate(this._state.dateFrom);
-      this.updateElement({ dateTo: this._state.dateFrom });
-    } else {
-      this.updateElement({ dateTo: userDate });
+  #destinationChangeHandler = (evt) => {
+    const selectedDestination = this.#destinations.find((dest) => dest.name === evt.target.value);
+
+    if (selectedDestination) {
+      this.updateElement({ destination: selectedDestination.id });
+      return;
     }
+
+    evt.target.value = '';
   };
 
   #setDatepickers() {
@@ -167,38 +124,84 @@ export default class EventEditFormView extends AbstractStatefulView {
     });
   }
 
+  #dateFromChangeHandler = ([userDate]) => {
+    this.updateElement({ dateFrom: userDate });
+    this.#datepickerEnd.set('minDate', userDate);
+    if (new Date(this._state.dateTo) < userDate) {
+      this.updateElement({ dateTo: userDate });
+      this.#datepickerEnd.setDate(userDate);
+    }
+  };
+
+  #dateToChangeHandler = ([userDate]) => {
+    if (new Date(userDate) < new Date(this._state.dateFrom)) {
+      this.#datepickerEnd.setDate(this._state.dateFrom);
+      this.updateElement({ dateTo: this._state.dateFrom });
+      return;
+    }
+
+    this.updateElement({ dateTo: userDate });
+  };
+
+  #priceChangeHandler = (evt) => {
+    evt.target.value = evt.target.value.replace(/\D/g, ''); // Удаляем все нечисловые символы
+    this._setState({ basePrice: Number(evt.target.value) || 0 });
+  };
+
+  #offersChangeHandler = (evt) => {
+    const offerId = evt.target.dataset.offerId;
+    this._setState({
+      offers: this._state.offers.map((offer) =>
+        offer.id === offerId ? { ...offer, checked: evt.target.checked } : offer
+      ),
+    });
+  };
+
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+
+    const selectedOffers = Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked')).map((input) => {
+      const offerType = this.#offers.find((offer) => offer.type === this._state.type);
+      return offerType ? offerType.offers.find((offer) => offer.id === input.id) : null;
+    }).filter(Boolean);
+
+    const updatedEvent = {
+      ...EventEditFormView.parseStateToEvent(this._state),
+      offers: selectedOffers,
+    };
+
+    this.#handleFormSubmit(updatedEvent);
+  };
+
+  #handleCancelClick = (evt) => {
+    evt.preventDefault();
+    this.#handleEditClick(EventEditFormView.parseStateToEvent(this._state));
+  };
+
+  #deleteClickHandler  = (evt) => {
+    evt.preventDefault();
+    this.#handleDeleteClick(this._state.id); // Передаем ID в обработчик
+    this.removeElement(); // Удаляем форму из DOM
+  };
+
+  #editClickHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement({ offers: this._state.offers }); // Обновляем состояние перед закрытием
+    this.#handleEditClick();
+  };
+
   static parseEventToState(event) {
     return {
       ...event,
-      basePrice: event.basePrice ?? 0, // Если undefined, заменяем на 0
+      basePrice: event.basePrice ?? 0,
     };
   }
 
-#offerChangeHandler = (evt) => {
-  const offerId = evt.target.dataset.offerId;
-  this._setState({
-    offers: this._state.offers.map((offer) =>
-      offer.id === offerId ? { ...offer, checked: evt.target.checked } : offer
-    ),
-  });
-};
-
-static parseStateToEvent(state) {
-  return {
-    ...state,
-    basePrice: Number(state.basePrice) || 0,
-    offers: state.offers.map((offer) => ({ id: offer.id, title: offer.title, price: offer.price })),
-  };
-}
-
-getUpdatedEvent() {
-  return {
-    ...this._state,
-  };
-}
-
-updateElement(updatedState) {
-  super.updateElement(updatedState);
-  this._restoreHandlers(); // Заново вешаем обработчики после обновления
-}
+  static parseStateToEvent(state) {
+    return {
+      ...state,
+      basePrice: Number(state.basePrice) || 0,
+      offers: state.offers.map((offer) => ({ id: offer.id, title: offer.title, price: offer.price })),
+    };
+  }
 }

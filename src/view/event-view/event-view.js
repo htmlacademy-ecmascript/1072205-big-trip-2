@@ -24,10 +24,13 @@ export default class EventView extends AbstractView {
     return createEventTemplate(this.#event, this.#destinations, this.#offers);
   }
 
-  #onEditClick = (evt) => {
-    evt.preventDefault();
-    this.#handleEditClick();
-  };
+  updateFavoriteButton(isFavorite) {
+    const favoriteButton = this.element.querySelector('.event__favorite-btn');
+    if (favoriteButton) {
+      favoriteButton.classList.toggle('event__favorite-btn--active', isFavorite);
+      return;
+    }
+  }
 
   #onFavoriteButtonClick = (evt) => {
     evt.preventDefault();
@@ -36,11 +39,8 @@ export default class EventView extends AbstractView {
     }
   };
 
-  updateFavoriteButton(isFavorite) {
-    const favoriteButton = this.element.querySelector('.event__favorite-btn');
-    if (favoriteButton) {
-      favoriteButton.classList.toggle('event__favorite-btn--active', isFavorite);
-      return;
-    }
-  }
+  #onEditClick = (evt) => {
+    evt.preventDefault();
+    this.#handleEditClick();
+  };
 }
