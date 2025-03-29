@@ -12,7 +12,7 @@ export default class EventsModel extends Observable {
       this.#events = await this.#apiService.getEvents();
       this._notify(UpdateType.INIT, this.#events);
     } catch (err) {
-      console.error('Failed to load events:', err);
+      console.error('Ошибка загрузки данных:', err);
       this.#events = [];
     }
   }
@@ -21,11 +21,16 @@ export default class EventsModel extends Observable {
     return this.#events;
   }
 
-  updateEvent(updateType, update) {
+  async updateEvent(updateType, update) {
     const index = this.#events.findIndex((event) => event.id === update.id);
     if (index !== -1) {
-      this.#events[index] = update;
-      this._notify(updateType, update);
+      try {
+        const updatedEvent = await this.#apiService.updateEvent(update);
+        this.#events[index] = updatedEvent;
+        this._notify(updateType, updatedEvent);
+      } catch (error) {
+        console.error('Ошибка обновления данных:', error);
+      }
     }
   }
 

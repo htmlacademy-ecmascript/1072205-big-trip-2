@@ -25,6 +25,35 @@ export default class EventApiService extends ApiService {
     return this._adaptOffersData(await ApiService.parseResponse(response));
   }
 
+  async updateEvent(event) {
+    const adaptedEvent = this._adaptEventForServer(event);
+    const response = await this._load({
+      url: `points/${event.id}`,
+      method: Method.PUT,
+      body: JSON.stringify(adaptedEvent),
+      headers: new Headers({'Content-Type': 'application/json'})
+    });
+
+    return this._adaptPointsData(await ApiService.parseResponse(response));
+  }
+
+  _adaptEventForServer(event) {
+    return {
+      id: event.id,
+      type: event.type,
+      base_price: event.basePrice,
+      date_from: event.dateFrom.toISOString(),
+      date_to: event.dateTo.toISOString(),
+      destination: event.destination,
+      offers: event.offers.map((offer) => ({
+        id: offer.id,
+        title: offer.title,
+        price: offer.price
+      })),
+      is_favorite: event.isFavorite,
+    };
+  }
+
   _adaptPointsData(points) {
     return points.map((point) => ({
       id: point.id,
@@ -54,21 +83,8 @@ export default class EventApiService extends ApiService {
         id: offerItem.id,
         title: offerItem.title,
         price: offerItem.price,
-        isChecked: false, 
+        isChecked: false,
       })),
     }));
-  }
-
-  async updateEvent(event) {
-    const response = await this._load({
-      url: `tasks/${event.id}`,
-      method: Method.PUT,
-      body: JSON.stringify(event),
-      headers: new Headers({'Content-Type': 'application/json'}),
-    });
-
-    const parsedResponse = await ApiService.parseResponse(response);
-
-    return parsedResponse;
   }
 }
