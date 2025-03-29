@@ -18,18 +18,28 @@ export default class PagePresenter {
   #eventListPresenter = null;
 
   constructor(eventsModel, destinationsModel, offersModel) {
-    this.#eventsModel = eventsModel;
-    this.#destinationsModel = destinationsModel;
-    this.#offersModel = offersModel;
+    this.eventsModel = eventsModel;
+    this.destinationsModel = destinationsModel;
+    this.offersModel = offersModel;
+
+    this.#tripMainElement = document.querySelector('.trip-main'); // Здесь .trip-main должен быть существующим элементом в вашем HTML
+    this.#tripEventElement = document.querySelector('.trip-events'); // И аналогично для этого
   }
 
-  init() {
-    this.#events = [...this.#eventsModel.events];
-    this.#destinations = [...this.#destinationsModel.destinations];
-    this.#offers = [...this.#offersModel.offers];
+  async init() {
+    if (!this.eventsModel || !this.destinationsModel || !this.offersModel) {
+      throw new Error('Models are not initialized');
+    }
 
-    this.#tripMainElement = document.querySelector('.trip-main');
-    this.#tripEventElement = document.querySelector('.page-main .trip-events');
+    try {
+      await this.eventsModel.init();
+      await this.destinationsModel.init();
+      await this.offersModel.init();
+
+    } catch (error) {
+      console.error('Error during initialization:', error);
+      this.renderErrorMessage(error);
+    }
 
     if (this.#events.length === 0) {
       this.#renderNoEvent();

@@ -1,10 +1,22 @@
-import { getMockEvent } from '../mock/events.js';
+import { UpdateType } from '../const.js';
 import Observable from '../framework/observable.js';
-
-const EVENT_COUNT = 4;
+import EventApiService from '../event-api-service.js';
 
 export default class EventsModel extends Observable {
-  #events = Array.from({ length: EVENT_COUNT }, getMockEvent);
+  //#events = Array.from({ length: EVENT_COUNT }, getMockEvent);
+  #apiService = new EventApiService();
+  #events = [];
+
+
+  async init() {
+    try {
+      this.#events = await this.#apiService.getEvents();
+      this._notify(UpdateType.INIT, this.#events);
+    } catch (err) {
+      console.error('Failed to load events:', err);
+      this.#events = [];
+    }
+  }
 
   get events() {
     return this.#events;
@@ -24,9 +36,9 @@ export default class EventsModel extends Observable {
   }
 
   deleteEvent(updateType, event) {
-    const index = this._events.findIndex((item) => item.id === event.id);
+    const index = this.#events.findIndex((item) => item.id === event.id);
     if (index !== -1) {
-      this._events.splice(index, 1);
+      this.#events.splice(index, 1);
     }
     this._notify(updateType, event);
   }

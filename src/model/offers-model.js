@@ -1,8 +1,19 @@
-import { getMockTypeOffers } from '../mock/offers.js';
 import Observable from '../framework/observable.js';
+import EventApiService from '../event-api-service.js';
+import { UpdateType } from '../const.js';
 
 export default class OffersModel extends Observable {
-  #offers = getMockTypeOffers();
+  #apiService = new EventApiService();
+  #offers = [];
+
+  async init() {
+    try {
+      this.#offers = await this.#apiService.getOffers();
+      this._notify(UpdateType.INIT);
+    } catch (err) {
+      console.error('Failed to load offers:', err);
+    }
+  }
 
   get offers() {
     return this.#offers;
