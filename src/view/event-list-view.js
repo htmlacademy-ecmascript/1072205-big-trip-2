@@ -12,7 +12,6 @@ export default class EventListView extends AbstractView {
   }
 
   clear() {
-    // Очищаем все элементы списка
     this.element.innerHTML = '';
   }
 }

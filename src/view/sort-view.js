@@ -13,14 +13,14 @@ function createSortItemTemplate(sort) {
         value="sort-${type}"
         ${isChecked ? 'checked' : ''}
         data-sort-type="${type}"
-        ${((type === 'event') || (type === 'offers')) && 'disabled'}>
+        ${((type === 'event') || (type === 'offers')) ? 'disabled' : ''}>
       <label class="trip-sort__btn" for="sort-${type}" data-sort-type="${type}">${type}</label>
     </div>`
   );
 }
 
-function createSortTemplate(sortItems, onSortChange) {
-  const sortItemsTemplate = sortItems.map((sort) => createSortItemTemplate(sort, onSortChange)).join('');
+function createSortTemplate(sortItems) {
+  const sortItemsTemplate = sortItems.map((sort) => createSortItemTemplate(sort)).join('');
 
   return (
     `<form class="trip-events__trip-sort trip-sort" action="#" method="get">
@@ -31,24 +31,29 @@ function createSortTemplate(sortItems, onSortChange) {
 
 export default class SortView extends AbstractView {
   #sorts = null;
+  #currentSortType = null;
   #onSortChange = null;
 
   constructor({ sorts, onSortChange }) {
     super();
     this.#sorts = sorts;
     this.#onSortChange = onSortChange;
+
+    this.element.addEventListener('click', this.#handleSortClick);
   }
 
   get template() {
-    return createSortTemplate(this.#sorts, this.#onSortChange);
+    return createSortTemplate(this.#sorts);
   }
 
-  setEventListeners() {
-    this.element.querySelectorAll('.trip-sort__input').forEach((input) => {
-      input.addEventListener('change', (evt) => {
-        const sortType = evt.target.dataset.sortType;
-        this.#onSortChange(sortType); // вызываем переданный callback
-      });
-    });
-  }
+  #handleSortClick = (evt) => {
+    const sortType = evt.target.dataset.sortType;
+
+    if (!sortType || sortType === this.#currentSortType || sortType === 'event' || sortType === 'offers') {
+      return;
+    }
+
+    this.#currentSortType = sortType;
+    this.#onSortChange(sortType);
+  };
 }

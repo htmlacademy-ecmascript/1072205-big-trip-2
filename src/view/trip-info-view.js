@@ -9,10 +9,25 @@ function createTripInfoTemplate(events, destinations) {
   }
 
   const destinationNames = events.map((event) => destinations.find((dest) => dest.id === event.destination).name);
-  const tripInfoTitle = destinationNames.join(' &mdash; ');
+  const tripInfoTitle =
+    destinationNames.length > 3
+      ? `${destinationNames[0]} &mdash; ... &mdash; ${destinationNames[destinationNames.length - 1]}`
+      : destinationNames.join(' &mdash; ');
+
   const tripStartTime = Math.min(...events.map((event) => event.dateFrom));
   const tripEndTime = Math.max(...events.map((event) => event.dateTo));
-  const totalCost = events.reduce((sum, event) => sum + event.basePrice, 0);
+
+  const totalCost = events.reduce((sum, event) => {
+    let eventCost = event.basePrice;
+
+    if (Array.isArray(event.offers) && event.offers.length > 0) {
+      const selectedOffersCost = event.offers.reduce((offerSum, offer) => offerSum + offer.price, 0);
+
+      eventCost += selectedOffersCost;
+    }
+
+    return sum + eventCost;
+  }, 0);
 
   return (
     `<section class="trip-main__trip-info  trip-info">
@@ -33,14 +48,16 @@ function createTripInfoTemplate(events, destinations) {
 export default class TripInfoView extends AbstractView {
   #events;
   #destinations;
+  #offers;
 
-  constructor({ events, destinations }) {
+  constructor({ events, destinations, offers }) {
     super();
     this.#events = events;
     this.#destinations = destinations;
+    this.#offers = offers;
   }
 
   get template() {
-    return createTripInfoTemplate(this.#events, this.#destinations);
+    return createTripInfoTemplate(this.#events, this.#destinations, this.#offers);
   }
 }

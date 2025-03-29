@@ -1,24 +1,25 @@
-import { humanizeDate, eventDuration, isEventFavourite } from '../../utils/event';
+import { humanizeDate, eventDuration, isEventFavorite } from '../../utils/event';
 
 const EVENT_DATE_FORMAT = 'MMM DD';
 
 function createEventOffersTemplate(offers) {
   return offers && offers.map((offer) =>
     `<li class="event__offer">
-      <span class="event__offer-title">${offer.title}</span>
-      &plus;&euro;&nbsp;
-      <span class="event__offer-price">${offer.price}</span>
+      <span class="event__offer-title">${offer.isChecked ? offer.title : ''}</span>
+      ${offer.isChecked ? '&plus;&euro;&nbsp;' : ''}
+      <span class="event__offer-price">${offer.isChecked ? offer.price : ''}</span>
     </li>`
   ).join('');
 }
 
-function createEventTemplate(event, destinations) {
-  const {basePrice, dateFrom, dateTo, destination, offers, type, isFavourite } = event;
+function createEventTemplate(event, destinations, offersList) {
+  const {basePrice, dateFrom, dateTo, destination, type, isFavorite } = event;
   const date = humanizeDate(dateFrom, EVENT_DATE_FORMAT).date;
   const startTime = humanizeDate(dateFrom).time;
   const endTime = humanizeDate(dateTo).time;
   const duration = Object.entries(eventDuration(dateFrom, dateTo)).map((item) => item[1]).join('\n');
   const destinationById = destinations.find((dest) => dest.id === destination).name;
+  const offersByType = offersList.find((offer) => offer.type.toLowerCase() === type.toLowerCase())?.offers ?? [];
 
   return (
     `<li class="trip-events__item">
@@ -41,9 +42,9 @@ function createEventTemplate(event, destinations) {
         </p>
         <h4 class="visually-hidden">Offers:</h4>
         <ul class="event__selected-offers">
-          ${createEventOffersTemplate(offers)}
+          ${createEventOffersTemplate(offersByType)}
         </ul>
-        <button class="event__favorite-btn ${isEventFavourite(isFavourite)}" type="button">
+        <button class="event__favorite-btn ${isEventFavorite(isFavorite)}" type="button">
           <span class="visually-hidden">Add to favorite</span>
           <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
             <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"/>

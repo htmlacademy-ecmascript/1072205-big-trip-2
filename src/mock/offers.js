@@ -1,5 +1,5 @@
 import { EVENT_TYPES, OFFERS } from '../const.js';
-import { getRandomNumber } from '../utils/common.js';
+import { getRandomNumber, getRandomBoolean } from '../utils/common.js';
 
 function getMockOffer() {
   const randomIndex = getRandomNumber(OFFERS.length);
@@ -7,7 +7,8 @@ function getMockOffer() {
   return {
     id: `offer${randomIndex}-id`,
     title: OFFERS[randomIndex],
-    price: getRandomNumber(100)
+    price: getRandomNumber(100),
+    isChecked: getRandomBoolean()
   };
 }
 

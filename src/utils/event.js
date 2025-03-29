@@ -25,7 +25,7 @@ function eventDuration(startTime, endTime) {
   };
 }
 
-function isEventFavourite(isFavourite) {
+function isEventFavorite(isFavourite) {
   return isFavourite && 'event__favorite-btn--active';
 }
 
@@ -33,4 +33,4 @@ function updateItem(items, update) {
   return items.map((item) => item.id === update.id ? update : item);
 }
 
-export { humanizeDate, eventDuration, isEventFavourite, updateItem };
+export { humanizeDate, eventDuration, isEventFavorite, updateItem };
