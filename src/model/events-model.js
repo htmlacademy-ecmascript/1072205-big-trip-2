@@ -3,7 +3,6 @@ import Observable from '../framework/observable.js';
 import EventApiService from '../event-api-service.js';
 
 export default class EventsModel extends Observable {
-  //#events = Array.from({ length: EVENT_COUNT }, getMockEvent);
   #apiService = new EventApiService();
   #events = [];
 

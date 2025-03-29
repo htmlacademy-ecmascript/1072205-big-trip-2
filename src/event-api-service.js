@@ -50,7 +50,12 @@ export default class EventApiService extends ApiService {
   _adaptOffersData(offers) {
     return offers.map((offer) => ({
       type: offer.type,
-      offers: offer.offers,
+      offers: offer.offers.map((offerItem) => ({
+        id: offerItem.id,
+        title: offerItem.title,
+        price: offerItem.price,
+        isChecked: false, 
+      })),
     }));
   }
 

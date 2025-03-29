@@ -21,8 +21,7 @@ function createTripInfoTemplate(events, destinations) {
     let eventCost = event.basePrice;
 
     if (Array.isArray(event.offers) && event.offers.length > 0) {
-      const selectedOffersCost = event.offers.reduce((offerSum, offer) => offerSum + offer.price, 0);
-
+      const selectedOffersCost = event.offers.reduce((offerSum, offer) => offer.isChecked ? offerSum + offer.price : offerSum, 0);
       eventCost += selectedOffersCost;
     }
 
