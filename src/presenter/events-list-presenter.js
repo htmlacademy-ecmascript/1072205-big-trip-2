@@ -28,28 +28,30 @@ export default class EventsListPresenter {
     this.#eventsModel = eventsModel;
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
-    this.#eventsModel.addObserver(this._handleModelUpdate);
+    this.#eventsModel.addObserver(this.#handleModelUpdate);
   }
 
   init() {
-    this.#events = [...this.#eventsModel.events];
-    this.#destinations = [...this.#destinationsModel.destinations];
-    this.#offers = [...this.#offersModel.offers];
-
     this.#tripEventElement = document.querySelector('.page-main .trip-events');
     this.#filtersElement = document.querySelector('.trip-controls__filters');
 
+    this.#updateData();
     this.#renderFilters();
     this.#renderSort();
     this.#renderEventList();
 
-    document.querySelector('.trip-main__event-add-btn').addEventListener('click', this.#handleNewEventClick);
+    document.querySelector('.trip-main__event-add-btn')
+      .addEventListener('click', this.#handleNewEventClick);
   }
 
-  _handleModelUpdate = (event) => {
-    if (event === 'DELETE_EVENT') {
-      this.#reRenderEventList();
-    }
+  #updateData() {
+    this.#events = [...this.#eventsModel.events];
+    this.#destinations = [...this.#destinationsModel.destinations];
+    this.#offers = [...this.#offersModel.offers];
+  }
+
+  #handleModelUpdate = () => {
+    this.#reRenderEventList();
   };
 
   get filteredEvents() {
@@ -58,12 +60,11 @@ export default class EventsListPresenter {
 
   #applyFilter(event, filterType) {
     const now = new Date();
-    switch (filterType) {
-      case 'future': return event.dateFrom > now;
-      case 'present': return event.dateFrom <= now && event.dateTo >= now;
-      case 'past': return event.dateTo < now;
-      default: return true;
-    }
+    return {
+      future: event.dateFrom > now,
+      present: event.dateFrom <= now && event.dateTo >= now,
+      past: event.dateTo < now,
+    }[filterType] ?? true;
   }
 
   #handleFilterChange = (filterType) => {
@@ -81,24 +82,43 @@ export default class EventsListPresenter {
         eventsModel: this.#eventsModel,
         destinationsModel: this.#destinations,
         offersModel: this.#offers,
-        onDataChange: this.#handleDataChange,
+        onDataChange: this.#handleViewAction,
         onCloseForm: this.#closeNewEventForm,
       });
     }
+
     this.#newEventPresenter.init();
     document.addEventListener('keydown', this.#handleEscKeyDown);
     document.querySelector('.trip-main__event-add-btn').disabled = true;
   };
 
-  #handleDataChange = (actionType, updateType, updatedEvent) => {
-    if (actionType === UserAction.ADD_EVENT) {
-      this.#eventsModel.addEvent(updateType, updatedEvent);
-      this.#events.push(updatedEvent);
-    } else if (actionType === UserAction.DELETE_EVENT) {
-      this.#eventsModel.deleteEvent(updateType, updatedEvent);
-      this.#events = this.#events.filter((event) => event.id !== updatedEvent.id);
+  #handleViewAction = (actionType, updateType, update) => {
+    switch (actionType) {
+      case UserAction.ADD_EVENT:
+        this.#eventsModel.addEvent(updateType, update);
+        this.#events.push(update);
+        this.#reRenderEventList();
+        break;
+
+      case UserAction.UPDATE_EVENT:
+        this.#eventsModel.updateEvent(updateType, update);
+        this.#events = updateItem(this.#events, update);
+
+        if (this.#eventPresenters.has(update.id)) {
+          this.#eventPresenters.get(update.id).init(update, this.#eventsModel, this.#destinations, this.#offers, this.#resetEventViews, this.#handleViewAction);
+        }
+        break;
+
+      case UserAction.DELETE_EVENT:
+        this.#eventsModel.deleteEvent(updateType, update);
+        this.#events = this.#events.filter((event) => event.id !== update.id);
+
+        this.#eventPresenters.get(update.id)?.destroy();
+        this.#eventPresenters.delete(update.id);
+
+        this.#reRenderEventList();
+        break;
     }
-    this.#reRenderEventList();
   };
 
   #handleEscKeyDown = (evt) => {
@@ -137,12 +157,15 @@ export default class EventsListPresenter {
   }
 
   #renderEventList() {
-    if (this.filteredEvents.length === 0) {
+    if (!this.filteredEvents.length) {
       document.querySelector(`#filter-${this.#currentFilterType}`).disabled = true;
       return;
     }
+
     render(this.#eventListComponent, this.#tripEventElement);
-    this.filteredEvents.sort(this.#getSortFunction()).forEach((event) => this.#renderEvent(event));
+    this.filteredEvents
+      .sort(this.#getSortFunction())
+      .forEach((event) => this.#renderEvent(event));
   }
 
   #renderEvent(event) {
@@ -151,23 +174,10 @@ export default class EventsListPresenter {
       this.#reRenderEventList,
       this.#eventsModel
     );
+
     eventPresenter.init(event, this.#eventsModel, this.#destinations, this.#offers, this.#resetEventViews, this.#handleViewAction);
     this.#eventPresenters.set(event.id, eventPresenter);
   }
-
-  _onDataChange = (updateType, userAction, event) => {
-    if (userAction === UserAction.DELETE_EVENT) {
-      this.#eventsModel.deleteEvent(updateType, event);
-    }
-  };
-
-  #handleViewAction = (actionType, updateType, update) => {
-    if (actionType === UserAction.UPDATE_EVENT) {
-      this.#eventsModel.updateEvent(updateType, update);
-      this.#events = updateItem(this.#events, update);
-      this.#reRenderEventList();
-    }
-  };
 
   #handleSortChange = (sortType) => {
     if (this.#currentSortType !== sortType) {
@@ -190,13 +200,13 @@ export default class EventsListPresenter {
     this.#eventListComponent.clear();
   }
 
-
   #reRenderEventList() {
     this.#clearEventList();
+    this.#updateData();
     this.#renderEventList();
   }
 
   getEventPresenters() {
-    return this.#eventPresenters || [];
+    return this.#eventPresenters;
   }
 }
