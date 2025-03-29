@@ -34,6 +34,7 @@ export default class EventApiService extends ApiService {
       basePrice: point.base_price,
       destination: point.destination,
       offers: point.offers,
+      isFavorite: false,
     }));
   }
 

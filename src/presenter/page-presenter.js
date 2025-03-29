@@ -4,10 +4,6 @@ import NoEventView from '../view/no-event-view.js';
 import EventsListPresenter from './events-list-presenter.js';
 
 export default class PagePresenter {
-  #eventsModel = null;
-  #destinationsModel = null;
-  #offersModel = null;
-
   #events = [];
   #destinations = [];
   #offers = [];
@@ -22,23 +18,21 @@ export default class PagePresenter {
     this.destinationsModel = destinationsModel;
     this.offersModel = offersModel;
 
-    this.#tripMainElement = document.querySelector('.trip-main'); // Здесь .trip-main должен быть существующим элементом в вашем HTML
-    this.#tripEventElement = document.querySelector('.trip-events'); // И аналогично для этого
+    this.#tripMainElement = document.querySelector('.trip-main');
+    this.#tripEventElement = document.querySelector('.trip-events'); 
   }
 
   async init() {
     if (!this.eventsModel || !this.destinationsModel || !this.offersModel) {
-      throw new Error('Models are not initialized');
+      throw new Error('Модели не инициализированы');
     }
 
     try {
-      await this.eventsModel.init();
-      await this.destinationsModel.init();
-      await this.offersModel.init();
-
+      this.#events = await this.eventsModel.events;
+      this.#destinations = await this.destinationsModel.destinations;
+      this.#offers = await this.offersModel.offers;
     } catch (error) {
-      console.error('Error during initialization:', error);
-      this.renderErrorMessage(error);
+      console.log('Данные не получены');
     }
 
     if (this.#events.length === 0) {
@@ -76,7 +70,7 @@ export default class PagePresenter {
   }
 
   #renderEventList() {
-    this.#eventListPresenter = new EventsListPresenter(this.#eventsModel, this.#destinationsModel, this.#offersModel);
+    this.#eventListPresenter = new EventsListPresenter(this.eventsModel, this.destinationsModel, this.offersModel);
     this.#eventListPresenter.init();
 
     this.#eventPresenters = this.#eventListPresenter.getEventPresenters();
