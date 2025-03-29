@@ -21,7 +21,7 @@ export default class EventPresenter {
   constructor(container, renderEventList, eventsModel) {
     this.#tripEventsListElement = container;
     this.renderEventList = renderEventList;
-    this.#eventsModel = eventsModel;  // Инициализируем модель
+    this.#eventsModel = eventsModel;
   }
 
   init(event, eventsModel, destinationsModel, offersModel, onDataChange, onResetView) {
@@ -53,7 +53,7 @@ export default class EventPresenter {
       offers: this.#offers,
       onFormSubmit: this.#handleFormSubmit,
       onEditClick: this.#handleCloseClick,
-      onDeleteClick: this.#handleDeleteClick, 
+      onDeleteClick: this.#handleDeleteClick,
     });
 
     if (prevEventComponent && prevEventEditComponent) {
@@ -109,14 +109,13 @@ export default class EventPresenter {
   };
 
   #handleDeleteClick = () => {
-    console.log('Delete button clicked in EventPresenter');
     this.#onDataChange(UserAction.DELETE_EVENT, UpdateType.MINOR, this.#event); // Вызываем обработчик удаления
-    this.destroy(); // Удаляем компонент из DOM
+    this.destroy();
   };
 
   _onDataChange = (updateType, userAction, event) => {
     if (userAction === UserAction.DELETE_EVENT) {
-      this.#eventsModel.deleteEvent(updateType, event); // Удаляем событие из модели
+      this.#eventsModel.deleteEvent(updateType, event);
     }
   };
 

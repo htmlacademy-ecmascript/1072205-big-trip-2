@@ -13,7 +13,7 @@ function createEventOffersTemplate(offers) {
 }
 
 function createEventTemplate(event, destinations, offersList) {
-  const {basePrice, dateFrom, dateTo, destination, offers, type, isFavorite } = event;
+  const {basePrice, dateFrom, dateTo, destination, type, isFavorite } = event;
   const date = humanizeDate(dateFrom, EVENT_DATE_FORMAT).date;
   const startTime = humanizeDate(dateFrom).time;
   const endTime = humanizeDate(dateTo).time;

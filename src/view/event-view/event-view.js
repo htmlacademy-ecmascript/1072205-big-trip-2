@@ -28,7 +28,6 @@ export default class EventView extends AbstractView {
     const favoriteButton = this.element.querySelector('.event__favorite-btn');
     if (favoriteButton) {
       favoriteButton.classList.toggle('event__favorite-btn--active', isFavorite);
-      return;
     }
   }
 

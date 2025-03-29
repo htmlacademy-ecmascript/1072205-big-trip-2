@@ -50,10 +50,10 @@ export default class EventsListPresenter {
     if (event === 'DELETE_EVENT') {
       this.#reRenderEventList();
     }
-  }
+  };
 
   get filteredEvents() {
-    return this.#events.filter(event => this.#applyFilter(event, this.#currentFilterType));
+    return this.#events.filter((event) => this.#applyFilter(event, this.#currentFilterType));
   }
 
   #applyFilter(event, filterType) {
@@ -96,7 +96,7 @@ export default class EventsListPresenter {
       this.#events.push(updatedEvent);
     } else if (actionType === UserAction.DELETE_EVENT) {
       this.#eventsModel.deleteEvent(updateType, updatedEvent);
-      this.#events = this.#events.filter(event => event.id !== updatedEvent.id);
+      this.#events = this.#events.filter((event) => event.id !== updatedEvent.id);
     }
     this.#reRenderEventList();
   };
@@ -117,9 +117,9 @@ export default class EventsListPresenter {
   };
 
   #renderFilters() {
-    const filters = generateFilter(this.#events).map(filter => ({
+    const filters = generateFilter(this.#events).map((filter) => ({
       ...filter,
-      isDisabled: this.#events.every(event => !this.#applyFilter(event, filter.type))
+      isDisabled: this.#events.every((event) => !this.#applyFilter(event, filter.type))
     }));
 
     render(new FiltersView({
@@ -142,7 +142,7 @@ export default class EventsListPresenter {
       return;
     }
     render(this.#eventListComponent, this.#tripEventElement);
-    this.filteredEvents.sort(this.#getSortFunction()).forEach(event => this.#renderEvent(event));
+    this.filteredEvents.sort(this.#getSortFunction()).forEach((event) => this.#renderEvent(event));
   }
 
   #renderEvent(event) {
@@ -154,9 +154,10 @@ export default class EventsListPresenter {
     eventPresenter.init(event, this.#eventsModel, this.#destinations, this.#offers, this.#resetEventViews, this.#handleViewAction);
     this.#eventPresenters.set(event.id, eventPresenter);
   }
+
   _onDataChange = (updateType, userAction, event) => {
     if (userAction === UserAction.DELETE_EVENT) {
-      this.#eventsModel.deleteEvent(updateType, event);  // Убедитесь, что event здесь правильно передается
+      this.#eventsModel.deleteEvent(updateType, event);
     }
   };
 
@@ -176,22 +177,21 @@ export default class EventsListPresenter {
   };
 
   #getSortFunction() {
-    return SORTS.find(sortItem => sortItem.type === this.#currentSortType)?.sort || (() => 0);
+    return SORTS.find((sortItem) => sortItem.type === this.#currentSortType)?.sort || (() => 0);
   }
 
   #resetEventViews = () => {
-    this.#eventPresenters.forEach(presenter => presenter.resetView());
+    this.#eventPresenters.forEach((presenter) => presenter.resetView());
   };
 
   #clearEventList() {
-    this.#eventPresenters.forEach(presenter => presenter.destroy());
+    this.#eventPresenters.forEach((presenter) => presenter.destroy());
     this.#eventPresenters.clear();
     this.#eventListComponent.clear();
   }
 
 
   #reRenderEventList() {
-    console.log('Re-rendering event list...');
     this.#clearEventList();
     this.#renderEventList();
   }

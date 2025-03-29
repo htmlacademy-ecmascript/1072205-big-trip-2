@@ -70,8 +70,12 @@ export default class EventEditFormView extends AbstractStatefulView {
     this.element.querySelector('.event__input--price').addEventListener('input', this.#priceChangeHandler);
     this.element.querySelectorAll('.event__offer-checkbox').forEach((checkbox) => checkbox.addEventListener('change', this.#offersChangeHandler));
     this.element.querySelector('.event--edit').addEventListener('submit', this.#formSubmitHandler);
-    (resetButton.innerHTML === 'Cancel') && (this.element.querySelector('.event__reset-btn').addEventListener('click', this.#handleCancelClick));
-    (resetButton.innerHTML === 'Delete') && (this.element.querySelector('.event__reset-btn').addEventListener('click', this.#deleteClickHandler));
+    if (resetButton.innerHTML === 'Cancel') {
+      this.element.querySelector('.event__reset-btn').addEventListener('click', this.#handleCancelClick);
+    }
+    if (resetButton.innerHTML === 'Delete') {
+      this.element.querySelector('.event__reset-btn').addEventListener('click', this.#deleteClickHandler);
+    }
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
   }
 
@@ -181,11 +185,10 @@ export default class EventEditFormView extends AbstractStatefulView {
   #deleteClickHandler = (evt) => {
     evt.preventDefault();
     if (!this.#handleDeleteClick) {
-      console.error("Delete handler is missing!");
       return;
     }
     this.#handleDeleteClick();
-};
+  };
 
   #editClickHandler = (evt) => {
     evt.preventDefault();

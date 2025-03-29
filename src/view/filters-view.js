@@ -64,5 +64,5 @@ export default class FiltersView extends AbstractView {
 
     this.#currentFilterType = selectedFilter;
     this.#onFilterChange(selectedFilter);
-  }
+  };
 }
