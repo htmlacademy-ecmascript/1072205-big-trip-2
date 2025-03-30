@@ -47,6 +47,12 @@ export default class EventEditFormView extends AbstractStatefulView {
 
   updateElement(updatedState) {
     super.updateElement(updatedState);
+
+    this.element.querySelectorAll('.event__offer-checkbox').forEach((checkbox) => {
+      const offerId = checkbox.id;
+      checkbox.checked = this._state.offers.includes(offerId);
+    });
+
     this._restoreHandlers();
   }
 
@@ -154,29 +160,35 @@ export default class EventEditFormView extends AbstractStatefulView {
   };
 
   #offersChangeHandler = (evt) => {
-    const offerId = evt.target.dataset.offerId;
-    this._setState({
-      offers: this._state.offers.map((offer) =>
-        offer.id === offerId ? { ...offer, checked: evt.target.checked } : offer
-      ),
+    const offerId = evt.target.id;
+    const checked = evt.target.checked;
+
+    this.updateElement({
+      offers: checked
+        ? [...this._state.offers, offerId]
+        : this._state.offers.filter(id => id !== offerId),
     });
   };
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
 
-    const selectedOffers = Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked'))
-      .map((input) => {
-        const offerType = this.#offers.find((offer) => offer.type === this._state.type);
-        return offerType ? offerType.offers.find((offer) => offer.id === input.id) : null;
-      })
-      .filter(Boolean);
+    const selectedOffers = this._state.offers;
+
+    console.log('Selected offers:', selectedOffers);
+
+    if (!this._state.id) {
+      console.error('Event ID is missing!');
+      return;
+    }
 
     const updatedEvent = {
-      ...EventEditFormView.parseStateToEvent(this._state),
-      id: this._state.id || crypto.randomUUID(), // Генерация UUID только если id нет
+      ...EventEditFormView.parseStateToEvent(this._state, this.#offers || []),
+      id: this._state.id || crypto.randomUUID(),
       offers: selectedOffers,
     };
+
+    console.log('Submitting event update:', updatedEvent);
 
     this.#handleFormSubmit(updatedEvent);
   };
@@ -204,14 +216,18 @@ export default class EventEditFormView extends AbstractStatefulView {
     return {
       ...event,
       basePrice: event.basePrice ?? 0,
+      offers: event.offers ?? [],
     };
   }
 
-  static parseStateToEvent(state) {
+  static parseStateToEvent(state, offers = []) {
     return {
       ...state,
       basePrice: Number(state.basePrice) || 0,
-      offers: state.offers.map((offer) => ({ id: offer.id, title: offer.title, price: offer.price })),
+      offers: state.offers.map((offerId) => {
+        const offer = offers.find((offer) => offer.id === offerId);
+        return offer ? { id: offer.id, title: offer.title, price: offer.price } : null;
+      }).filter(Boolean),
     };
   }
 }
