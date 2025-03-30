@@ -113,7 +113,7 @@ export default class EventsListPresenter {
 
       case UserAction.DELETE_EVENT:
         console.log(actionType);
-        this.#eventsModel.deleteEvent(updateType, update);
+        this.#eventsModel.deleteEvent(update.id);
         this.#events = this.#events.filter((event) => event.id !== update.id);
 
         this.#eventPresenters.get(update.id)?.destroy();
@@ -175,7 +175,8 @@ export default class EventsListPresenter {
     const eventPresenter = new EventPresenter(
       this.#tripEventElement.querySelector('.trip-events__list'),
       this.#reRenderEventList,
-      this.#eventsModel
+      this.#eventsModel,
+      this.#handleViewAction,
     );
 
     eventPresenter.init(event, this.#eventsModel, this.#destinations, this.#offers, this.#resetEventViews, this.#handleViewAction);

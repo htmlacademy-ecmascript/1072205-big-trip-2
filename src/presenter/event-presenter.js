@@ -14,14 +14,16 @@ export default class EventPresenter {
   #eventEditFormComponent = null;
   #onDataChange = null;
   #onResetView = null;
+  #handleViewAction = null; 
   renderEventList = null;
   static #currentlyEditing = null;
   #eventsModel = null;
 
-  constructor(container, renderEventList, eventsModel) {
+  constructor(container, renderEventList, eventsModel, handleViewAction) {
     this.#tripEventsListElement = container;
     this.renderEventList = renderEventList;
     this.#eventsModel = eventsModel;
+    this.#handleViewAction = handleViewAction;
   }
 
   init(event, eventsModel, destinationsModel, offersModel, onDataChange, onResetView) {
@@ -99,7 +101,6 @@ export default class EventPresenter {
     }
 
     EventPresenter.#currentlyEditing = this;
-    this.#onResetView(); // Закрываем другие открытые формы
     this.#replaceItemToForm();
   };
 
@@ -111,14 +112,13 @@ export default class EventPresenter {
 
   #handleDeleteClick = () => {
     this.#onDataChange(UserAction.DELETE_EVENT, UpdateType.MINOR, this.#event);
+
+    if (this.#handleViewAction) {
+      this.#handleViewAction(UserAction.DELETE_EVENT, UpdateType.MINOR, this.#event);
+    }
     this.destroy();
   };
 
-  _onDataChange = (updateType, userAction, event) => {
-    if (userAction === UserAction.DELETE_EVENT) {
-      this.#eventsModel.deleteEvent(updateType, event);
-    }
-  };
 
   #handleCloseClick = () => {
     this.#replaceFormToItem();
@@ -157,20 +157,18 @@ export default class EventPresenter {
       event: this.#event,
       destinations: this.#destinations,
       offers: this.#offers,
-      onEditClick: this.#handleEditClick, // Обязательно заново передаем обработчик
+      onEditClick: this.#handleEditClick,
       onFavoriteClick: this.#handleFavoriteClick
     });
 
     replace(this.#eventComponent, this.#eventEditFormComponent);
     remove(this.#eventEditFormComponent);
-    this.#eventEditFormComponent = null; // Сбрасываем ссылку на форму
+    this.#eventEditFormComponent = null;
 
-    // Очищаем глобальную переменную, чтобы открыть новую форму при следующем клике
     EventPresenter.#currentlyEditing = null;
 
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
-
 
   #escKeyDownHandler = (evt) => {
     if (isEscape(evt)) {
