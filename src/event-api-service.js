@@ -39,6 +39,7 @@ export default class EventApiService extends ApiService {
   }
 
   _adaptEventForServer(event) {
+    console.log(event);
     return {
       id: event.id,
       type: event.type,
