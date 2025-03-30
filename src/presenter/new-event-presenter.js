@@ -28,7 +28,7 @@ export default class NewEventPresenter {
         startDate: '',
         endDate: '',
         cost: 0,
-        offers: defaultOffers, // Передаем офферы, соответствующие типу
+        offers: defaultOffers,
       },
       destinations: this.#destinations,
       offers: this.#offers,
@@ -41,13 +41,13 @@ export default class NewEventPresenter {
 
   #formSubmitHandler = (updatedEvent) => {
     this.#onDataChange(UserAction.ADD_EVENT, UpdateType.MINOR, updatedEvent);
-    this.#handleCloseFormClick(); // Закрываем форму после сохранения
+    this.#handleCloseFormClick();
   };
 
   #handleCloseFormClick = () => {
     this.#onCloseForm();
     remove(this.#eventEditFormComponent);
-    this.#eventEditFormComponent = null; // Очищаем ссылку, чтобы избежать багов
+    this.#eventEditFormComponent = null; 
   };
 
   destroy() {

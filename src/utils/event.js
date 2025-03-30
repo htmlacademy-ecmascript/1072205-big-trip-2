@@ -29,8 +29,4 @@ function isEventFavorite(isFavourite) {
   return isFavourite && 'event__favorite-btn--active';
 }
 
-function updateItem(items, update) {
-  return items.map((item) => item.id === update.id ? update : item);
-}
-
-export { humanizeDate, eventDuration, isEventFavorite, updateItem };
+export { humanizeDate, eventDuration, isEventFavorite };

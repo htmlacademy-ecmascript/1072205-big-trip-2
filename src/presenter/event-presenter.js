@@ -109,7 +109,7 @@ export default class EventPresenter {
   };
 
   #handleDeleteClick = () => {
-    this.#onDataChange(UserAction.DELETE_EVENT, UpdateType.MINOR, this.#event); // Вызываем обработчик удаления
+    this.#onDataChange(UserAction.DELETE_EVENT, UpdateType.MINOR, this.#event);
     this.destroy();
   };
 
