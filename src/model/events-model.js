@@ -21,16 +21,24 @@ export default class EventsModel extends Observable {
     return this.#events;
   }
 
-  async updateEvent(updateType, update) {
+  // async updateEvent(updateType, update) {
+  //   const index = this.#events.findIndex((event) => event.id === update.id);
+  //   if (index !== -1) {
+  //     try {
+  //       const updatedEvent = await this.#apiService.updateEvent(update);
+  //       this.#events[index] = updatedEvent;
+  //       this._notify(updateType, updatedEvent);
+  //     } catch (error) {
+  //       console.error('Ошибка обновления данных:', error);
+  //     }
+  //   }
+  // }
+
+  updateEvent(updateType, update) {
     const index = this.#events.findIndex((event) => event.id === update.id);
     if (index !== -1) {
-      try {
-        const updatedEvent = await this.#apiService.updateEvent(update);
-        this.#events[index] = updatedEvent;
-        this._notify(updateType, updatedEvent);
-      } catch (error) {
-        console.error('Ошибка обновления данных:', error);
-      }
+      this.#events[index] = update;
+      this._notify(updateType, update);
     }
   }
 
@@ -39,11 +47,8 @@ export default class EventsModel extends Observable {
     this._notify(updateType, newEvent);
   }
 
-  deleteEvent(updateType, event) {
-    const index = this.#events.findIndex((item) => item.id === event.id);
-    if (index !== -1) {
-      this.#events.splice(index, 1);
-    }
-    this._notify(updateType, event);
+  deleteEvent(eventId) {
+    const index = this.#events.findIndex((event) => event.id === eventId);
+    this.#events.splice(index, 1);
   }
 }

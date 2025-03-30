@@ -14,14 +14,16 @@ export default class EventPresenter {
   #eventEditFormComponent = null;
   #onDataChange = null;
   #onResetView = null;
+  #handleViewAction = null;
   renderEventList = null;
   static #currentlyEditing = null;
   #eventsModel = null;
 
-  constructor(container, renderEventList, eventsModel) {
+  constructor(container, renderEventList, eventsModel, handleViewAction) {
     this.#tripEventsListElement = container;
     this.renderEventList = renderEventList;
     this.#eventsModel = eventsModel;
+    this.#handleViewAction = handleViewAction;
   }
 
   init(event, eventsModel, destinationsModel, offersModel, onDataChange, onResetView) {
@@ -78,6 +80,7 @@ export default class EventPresenter {
   }
 
   destroy() {
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
     remove(this.#eventComponent);
     remove(this.#eventEditFormComponent);
   }
@@ -94,30 +97,31 @@ export default class EventPresenter {
 
   #handleEditClick = () => {
     if (EventPresenter.#currentlyEditing) {
-      EventPresenter.#currentlyEditing.resetView();
+      EventPresenter.#currentlyEditing.#replaceFormToItem();
     }
 
     EventPresenter.#currentlyEditing = this;
-    this.#onResetView();
     this.#replaceItemToForm();
   };
 
   #handleFormSubmit = (updatedEvent) => {
     this.#event = { ...this.#event, ...updatedEvent };
     this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, updatedEvent);
+    if (this.#handleViewAction) {
+      this.#handleViewAction(UserAction.UPDATE_EVENT, UpdateType.MINOR, this.#event);
+    }
     this.#replaceFormToItem();
   };
 
   #handleDeleteClick = () => {
-    this.#onDataChange(UserAction.DELETE_EVENT, UpdateType.MINOR, this.#event); // Вызываем обработчик удаления
+    this.#onDataChange(UserAction.DELETE_EVENT, UpdateType.MINOR, this.#event);
+
+    if (this.#handleViewAction) {
+      this.#handleViewAction(UserAction.DELETE_EVENT, UpdateType.MINOR, this.#event);
+    }
     this.destroy();
   };
 
-  _onDataChange = (updateType, userAction, event) => {
-    if (userAction === UserAction.DELETE_EVENT) {
-      this.#eventsModel.deleteEvent(updateType, event);
-    }
-  };
 
   #handleCloseClick = () => {
     this.#replaceFormToItem();
@@ -126,6 +130,10 @@ export default class EventPresenter {
   #replaceItemToForm() {
     if (!this.#eventComponent.element.parentElement) {
       return;
+    }
+
+    if (this.#eventEditFormComponent) {
+      remove(this.#eventEditFormComponent);
     }
 
     this.#eventEditFormComponent = new EventEditFormView({
@@ -148,7 +156,7 @@ export default class EventPresenter {
       return;
     }
 
-    const updatedEventComponent = new EventView({
+    this.#eventComponent = new EventView({
       event: this.#event,
       destinations: this.#destinations,
       offers: this.#offers,
@@ -156,10 +164,12 @@ export default class EventPresenter {
       onFavoriteClick: this.#handleFavoriteClick
     });
 
-    replace(updatedEventComponent, this.#eventEditFormComponent);
+    replace(this.#eventComponent, this.#eventEditFormComponent);
     remove(this.#eventEditFormComponent);
+    this.#eventEditFormComponent = null;
 
-    this.#eventComponent = updatedEventComponent;
+    EventPresenter.#currentlyEditing = null;
+
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 
