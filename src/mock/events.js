@@ -6,12 +6,12 @@ function getMockEvent() {
   return {
     id: `event${getRandomNumber(10) + 1}-id`,
     basePrice: getRandomNumber(1000),
-    dateFrom: getRandomDate(new Date(), new Date(2025, 6, 1)),
-    dateTo: getRandomDate(new Date(2025, 6, 1), new Date(2026, 0, 1)),
+    dateFrom: getRandomDate(new Date(2023, 6, 1), new Date(2025, 6, 1)),
+    dateTo: getRandomDate(new Date(2025, 6, 1), new Date(2027, 6, 2)),
     destination: `id-destination${getRandomNumber(DESTINATIONS.length)}`,
-    isFavourite: getRandomBoolean(),
+    isFavorite: getRandomBoolean(),
     offers: Array.from({ length: getRandomNumber(OFFERS.length)}, getMockOffer),
-    type: getRandomArrayElement(EVENT_TYPES),
+    type: getRandomArrayElement(EVENT_TYPES)
   };
 }
 

@@ -36,7 +36,7 @@ const FILTERS = [
   },
   {
     type: 'future',
-    filter: (events) => events.filter((event) => event.dateTo < new Date()),
+    filter: (events) => events.filter((event) => event.dateTo > new Date()),
     isChecked: false,
   },
   {
@@ -46,7 +46,7 @@ const FILTERS = [
   },
   {
     type: 'past',
-    filter: (events) => events.filter((event) => event.dateFrom > new Date()),
+    filter: (events) => events.filter((event) => event.dateFrom < new Date()),
     isChecked: false,
   },
 ];
@@ -54,7 +54,7 @@ const FILTERS = [
 const SORTS = [
   {
     type: 'day',
-    sort: (events) => events.sort((event1, event2) => event1.dateFrom - event2.dateFrom),
+    sort: (a, b) => new Date(a.dateFrom) - new Date(b.dateFrom),
     isChecked: true,
   },
   {
@@ -64,12 +64,12 @@ const SORTS = [
   },
   {
     type: 'time',
-    sort: (events) => events.sort((event1, event2) => (event2.dateTo - event2.dateFrom) - (event1.dateTo - event1.dateFrom)),
+    sort: (a, b) => (b.dateTo - b.dateFrom) - (a.dateTo - a.dateFrom),
     isChecked: false,
   },
   {
     type: 'price',
-    sort: (events) => events.sort((event1, event2) => event2.price - event1.price),
+    sort: (a, b) => b.basePrice - a.basePrice,
     isChecked: false,
   },
   {
@@ -79,5 +79,17 @@ const SORTS = [
   },
 ];
 
+const UserAction = {
+  UPDATE_EVENT: 'UPDATE_EVENT',
+  ADD_EVENT: 'ADD_EVENT',
+  DELETE_EVENT: 'DELETE_EVENT',
+};
 
-export { EVENT_TYPES, OFFERS, DESTINATIONS, DESCRIPTIONS, PICTURE_URL, FILTERS, SORTS };
+const UpdateType = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR',
+};
+
+
+export { EVENT_TYPES, OFFERS, DESTINATIONS, DESCRIPTIONS, PICTURE_URL, FILTERS, SORTS, UserAction, UpdateType };
