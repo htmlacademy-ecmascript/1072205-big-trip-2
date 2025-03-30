@@ -14,7 +14,7 @@ export default class EventPresenter {
   #eventEditFormComponent = null;
   #onDataChange = null;
   #onResetView = null;
-  #handleViewAction = null; 
+  #handleViewAction = null;
   renderEventList = null;
   static #currentlyEditing = null;
   #eventsModel = null;
@@ -107,6 +107,9 @@ export default class EventPresenter {
   #handleFormSubmit = (updatedEvent) => {
     this.#event = { ...this.#event, ...updatedEvent };
     this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, updatedEvent);
+    if (this.#handleViewAction) {
+      this.#handleViewAction(UserAction.UPDATE_EVENT, UpdateType.MINOR, this.#event);
+    }
     this.#replaceFormToItem();
   };
 
