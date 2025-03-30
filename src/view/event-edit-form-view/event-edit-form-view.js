@@ -64,6 +64,7 @@ export default class EventEditFormView extends AbstractStatefulView {
 
   _restoreHandlers() {
     const resetButton = this.element.querySelector('.event__reset-btn');
+    resetButton.textContent = this._state.id ? 'Delete' : 'Cancel';
     this.element.querySelector('.event__type-group').addEventListener('change', this.#eventTypeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
     this.#setDatepickers();
