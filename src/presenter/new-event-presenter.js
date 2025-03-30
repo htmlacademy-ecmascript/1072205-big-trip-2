@@ -47,7 +47,7 @@ export default class NewEventPresenter {
   #handleCloseFormClick = () => {
     this.#onCloseForm();
     remove(this.#eventEditFormComponent);
-    this.#eventEditFormComponent = null; 
+    this.#eventEditFormComponent = null;
   };
 
   destroy() {

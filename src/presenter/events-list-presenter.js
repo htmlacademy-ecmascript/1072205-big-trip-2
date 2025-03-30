@@ -95,12 +95,14 @@ export default class EventsListPresenter {
   #handleViewAction = (actionType, updateType, update) => {
     switch (actionType) {
       case UserAction.ADD_EVENT:
+        console.log(actionType);
         this.#eventsModel.addEvent(updateType, update);
         this.#events.push(update);
         this.#reRenderEventList();
         break;
 
       case UserAction.UPDATE_EVENT:
+        console.log(actionType);
         this.#eventsModel.updateEvent(updateType, update);
         this.#events = updateItem(this.#events, update);
 
@@ -110,6 +112,7 @@ export default class EventsListPresenter {
         break;
 
       case UserAction.DELETE_EVENT:
+        console.log(actionType);
         this.#eventsModel.deleteEvent(updateType, update);
         this.#events = this.#events.filter((event) => event.id !== update.id);
 
