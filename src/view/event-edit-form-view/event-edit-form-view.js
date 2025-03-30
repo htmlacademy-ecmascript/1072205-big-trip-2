@@ -165,13 +165,16 @@ export default class EventEditFormView extends AbstractStatefulView {
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
 
-    const selectedOffers = Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked')).map((input) => {
-      const offerType = this.#offers.find((offer) => offer.type === this._state.type);
-      return offerType ? offerType.offers.find((offer) => offer.id === input.id) : null;
-    }).filter(Boolean);
+    const selectedOffers = Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked'))
+      .map((input) => {
+        const offerType = this.#offers.find((offer) => offer.type === this._state.type);
+        return offerType ? offerType.offers.find((offer) => offer.id === input.id) : null;
+      })
+      .filter(Boolean);
 
     const updatedEvent = {
       ...EventEditFormView.parseStateToEvent(this._state),
+      id: this._state.id || crypto.randomUUID(), // Генерация UUID только если id нет
       offers: selectedOffers,
     };
 
