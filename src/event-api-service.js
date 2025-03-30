@@ -7,7 +7,7 @@ const Method = {
 
 export default class EventApiService extends ApiService {
   constructor() {
-    super('https://23.objects.htmlacademy.pro/big-trip', 'Basic eo0w590ik29889a'); // заменить на свой токен
+    super('https://23.objects.htmlacademy.pro/big-trip', 'Basic eo0w590ik29889a'); // замените на свой токен
   }
 
   async getEvents() {
@@ -34,7 +34,8 @@ export default class EventApiService extends ApiService {
       headers: new Headers({'Content-Type': 'application/json'})
     });
 
-    return this._adaptPointsData(await ApiService.parseResponse(response));
+    const updatedData = await ApiService.parseResponse(response);
+    return this._adaptPointsData([updatedData])[0];
   }
 
   _adaptEventForServer(event) {
@@ -63,7 +64,7 @@ export default class EventApiService extends ApiService {
       basePrice: point.base_price,
       destination: point.destination,
       offers: point.offers,
-      isFavorite: false,
+      isFavorite: point.is_favorite,
     }));
   }
 
@@ -83,7 +84,7 @@ export default class EventApiService extends ApiService {
         id: offerItem.id,
         title: offerItem.title,
         price: offerItem.price,
-        isChecked: false,
+        isChecked: offerItem.isChecked || false,
       })),
     }));
   }

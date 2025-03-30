@@ -79,7 +79,7 @@ export default class EventsListPresenter {
     this.#clearFilters();
     this.#clearSort();
     this.#renderFilters();
-    this.#renderSort(); 
+    this.#renderSort();
 
     if (!this.#newEventPresenter) {
       this.#newEventPresenter = new NewEventPresenter({
@@ -97,6 +97,7 @@ export default class EventsListPresenter {
   };
 
   #handleViewAction = (actionType, updateType, update) => {
+
     switch (actionType) {
       case UserAction.ADD_EVENT:
         this.#eventsModel.addEvent(updateType, update);
@@ -105,7 +106,7 @@ export default class EventsListPresenter {
         break;
 
       case UserAction.UPDATE_EVENT:
-        this.#eventsModel.updateEvent(updateType, update);
+        this.#eventsModel.updateEvent(update);
         this.#events = updateItem(this.#events, update);
 
         if (this.#eventPresenters.has(update.id)) {
