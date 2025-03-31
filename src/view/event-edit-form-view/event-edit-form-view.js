@@ -172,23 +172,12 @@ export default class EventEditFormView extends AbstractStatefulView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-
     const selectedOffers = this._state.offers;
-
-    console.log('Selected offers:', selectedOffers);
-
-    if (!this._state.id) {
-      console.error('Event ID is missing!');
-      return;
-    }
-
     const updatedEvent = {
       ...EventEditFormView.parseStateToEvent(this._state, this.#offers || []),
       id: this._state.id || crypto.randomUUID(),
       offers: selectedOffers,
     };
-
-    console.log('Submitting event update:', updatedEvent);
 
     this.#handleFormSubmit(updatedEvent);
   };
