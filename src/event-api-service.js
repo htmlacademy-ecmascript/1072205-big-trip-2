@@ -39,7 +39,6 @@ export default class EventApiService extends ApiService {
   }
 
   _adaptEventForServer(event) {
-    console.log(event.offers);
     return {
       id: event.id,
       type: event.type,
@@ -47,7 +46,7 @@ export default class EventApiService extends ApiService {
       date_from: event.dateFrom.toISOString(),
       date_to: event.dateTo.toISOString(),
       destination: event.destination,
-      offers: event.offers.map((offer) => offer.id),
+      offers: Array.isArray(event.offers) ? event.offers : event.offers.map((offer) => offer.id),
       is_favorite: event.isFavorite,
     };
   }
