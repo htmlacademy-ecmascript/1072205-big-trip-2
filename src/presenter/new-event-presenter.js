@@ -25,9 +25,9 @@ export default class NewEventPresenter {
       event: {
         type: defaultType,
         destination: '',
-        startDate: '',
-        endDate: '',
-        cost: 0,
+        dateFrom: '',
+        dateTo: '',
+        basePrice: 0,
         offers: defaultOffers,
       },
       destinations: this.#destinations,
