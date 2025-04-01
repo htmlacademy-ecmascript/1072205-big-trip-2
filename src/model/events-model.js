@@ -34,16 +34,23 @@ export default class EventsModel extends Observable {
     }
   }
 
-  addEvent(updateType, newEvent) {
-    this.#events = [newEvent, ...this.#events];
-    this._notify(updateType, newEvent);
+  async addEvent(newEvent) {
+    try {
+      const addedEvent = await this.#apiService.addEvent(newEvent);
+      this.#events = [addedEvent, ...this.#events];
+      this._notify(UpdateType.POST, addedEvent);
+    } catch (err) {
+      console.error('Ошибка при добавлении события:', err);
+    }
   }
 
-  deleteEvent(eventId) {
-    const index = this.#events.findIndex((event) => event.id === eventId);
-    if (index !== -1) {
-      this.#events.splice(index, 1);
+  async deleteEvent(eventId) {
+    try {
+      await this.#apiService.deleteEvent(eventId);
+      this.#events = this.#events.filter((event) => event.id !== eventId);
+      this._notify(UpdateType.PATCH, eventId);
+    } catch (err) {
+      console.error('Ошибка при удалении события:', err);
     }
-    this._notify(UpdateType.PATCH, eventId);
   }
 }

@@ -100,7 +100,7 @@ export default class EventsListPresenter {
 
     switch (actionType) {
       case UserAction.ADD_EVENT:
-        this.#eventsModel.addEvent(updateType, update);
+        this.#eventsModel.addEvent(update);
         this.#events.push(update);
         this.#reRenderEventList();
         break;
