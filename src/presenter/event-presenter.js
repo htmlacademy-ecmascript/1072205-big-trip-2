@@ -93,6 +93,10 @@ export default class EventPresenter {
 
     this.#event = updatedEvent;
     this.#eventComponent.updateFavoriteButton(updatedEvent.isFavorite);
+
+    const updatedEventFromServer = this.#eventsModel.updateEvent(updatedEvent);
+    this.#eventComponent.updateFavoriteButton(updatedEventFromServer.isFavorite);
+    this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, updatedEventFromServer);
   };
 
   #handleEditClick = () => {
@@ -121,7 +125,6 @@ export default class EventPresenter {
     }
     this.destroy();
   };
-
 
   #handleCloseClick = () => {
     this.#replaceFormToItem();

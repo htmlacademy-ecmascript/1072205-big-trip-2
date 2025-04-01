@@ -8,4 +8,11 @@ const destinationsModel = new DestinationsModel();
 const offersModel = new OffersModel();
 
 const pagePresenter = new PagePresenter(eventsModel, destinationsModel, offersModel);
-pagePresenter.init();
+
+(async () => {
+  await eventsModel.init();
+  await destinationsModel.init();
+  await offersModel.init();
+
+  pagePresenter.init();
+})();

@@ -8,29 +8,31 @@ function createEventDestinationsList(destinations) {
   ).join('');
 }
 
-function createOffersTemplate(offers) {
-  return offers.map((offer) =>
-    `<div class="event__offer-selector">
-      <input class="event__offer-checkbox visually-hidden"
-        id="${offer.id}"
-        type="checkbox"
-        name="${offer.title}"
-        ${ offer.isChecked ? 'checked' : ''}>
-      <label class="event__offer-label" for="${offer.id}">
-        <span class="event__offer-title">${offer.title}</span>
-        &plus;&euro;&nbsp;
-        <span class="event__offer-price">${offer.price}</span>
-      </label>
-    </div>`
-  ).join('');
+function createOffersTemplate(offers, selectedOffers) {
+  return offers.map((offer) => {
+    const isChecked = selectedOffers.some((selectedOffer) => selectedOffer.id === offer.id);
+    return `
+      <div class="event__offer-selector">
+        <input class="event__offer-checkbox visually-hidden"
+          id="${offer.id}"
+          type="checkbox"
+          name="${offer.title}"
+          ${isChecked ? 'checked' : ''}>
+        <label class="event__offer-label" for="${offer.id}">
+          <span class="event__offer-title">${offer.title}</span>
+          &plus;&euro;&nbsp;
+          <span class="event__offer-price">${offer.price}</span>
+        </label>
+      </div>`;
+  }).join('');
 }
 
-function createOffersContainerTemplate(offersByType) {
+function createOffersContainerTemplate(offersByType, selectedOffers) {
   return offersByType.length ? (
     `<section class="event__section event__section--offers">
       <h3 class="event__section-title event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
-        ${createOffersTemplate(offersByType)}
+        ${createOffersTemplate(offersByType, selectedOffers)}
       </div>
     </section>`
   ) : '';
@@ -43,11 +45,12 @@ function createDestinationPhotoTemplate(destinationById) {
 }
 
 function createEventEditFormTemplate(event, destinations, offersList) {
-  const {basePrice, dateFrom, dateTo, destination, type} = event;
+  const {basePrice, dateFrom, dateTo, destination, offers, type} = event;
   const startTime = `${humanizeDate(dateFrom, EDIT_FORM_DATE_FORMAT).date} ${humanizeDate(dateFrom).time}`;
   const endTime = humanizeDate(dateTo, EDIT_FORM_DATE_FORMAT).date + humanizeDate(dateTo).time;
   const destinationById = destinations.find((dest) => dest.id === destination);
   const offersByType = offersList.find((offer) => offer.type.toLowerCase() === type.toLowerCase())?.offers ?? [];
+  const selectedOffers = offersByType.filter((offer) => offers.includes(offer.id));
 
   return (
     `<li class="trip-events__item">
@@ -139,13 +142,13 @@ function createEventEditFormTemplate(event, destinations, offersList) {
           </div>
 
           <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-          <button class="event__reset-btn" type="reset">${destination ? 'Delete' : 'Cancel'}</button>
+          <button class="event__reset-btn" type="reset">Delete</button>
           <button class="event__rollup-btn" type="button">
             <span class="visually-hidden">Open event</span>
           </button>
         </header>
         <section class="event__details">
-          ${createOffersContainerTemplate(offersByType)}
+          ${createOffersContainerTemplate(offersByType, selectedOffers)}
 
           ${destination ? `
           <section class="event__section  event__section--destination">

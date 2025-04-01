@@ -4,10 +4,6 @@ import NoEventView from '../view/no-event-view.js';
 import EventsListPresenter from './events-list-presenter.js';
 
 export default class PagePresenter {
-  #eventsModel = null;
-  #destinationsModel = null;
-  #offersModel = null;
-
   #events = [];
   #destinations = [];
   #offers = [];
@@ -18,18 +14,26 @@ export default class PagePresenter {
   #eventListPresenter = null;
 
   constructor(eventsModel, destinationsModel, offersModel) {
-    this.#eventsModel = eventsModel;
-    this.#destinationsModel = destinationsModel;
-    this.#offersModel = offersModel;
-  }
-
-  init() {
-    this.#events = [...this.#eventsModel.events];
-    this.#destinations = [...this.#destinationsModel.destinations];
-    this.#offers = [...this.#offersModel.offers];
+    this.eventsModel = eventsModel;
+    this.destinationsModel = destinationsModel;
+    this.offersModel = offersModel;
 
     this.#tripMainElement = document.querySelector('.trip-main');
-    this.#tripEventElement = document.querySelector('.page-main .trip-events');
+    this.#tripEventElement = document.querySelector('.trip-events'); 
+  }
+
+  async init() {
+    if (!this.eventsModel || !this.destinationsModel || !this.offersModel) {
+      throw new Error('Модели не инициализированы');
+    }
+
+    try {
+      this.#events = await this.eventsModel.events;
+      this.#destinations = await this.destinationsModel.destinations;
+      this.#offers = await this.offersModel.offers;
+    } catch (error) {
+      console.log('Данные не получены');
+    }
 
     if (this.#events.length === 0) {
       this.#renderNoEvent();
@@ -66,7 +70,7 @@ export default class PagePresenter {
   }
 
   #renderEventList() {
-    this.#eventListPresenter = new EventsListPresenter(this.#eventsModel, this.#destinationsModel, this.#offersModel);
+    this.#eventListPresenter = new EventsListPresenter(this.eventsModel, this.destinationsModel, this.offersModel);
     this.#eventListPresenter.init();
 
     this.#eventPresenters = this.#eventListPresenter.getEventPresenters();

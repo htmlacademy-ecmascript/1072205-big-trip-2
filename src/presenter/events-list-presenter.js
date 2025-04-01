@@ -1,4 +1,4 @@
-import { render } from '../framework/render.js';
+import { render, RenderPosition } from '../framework/render.js';
 import { generateFilter } from '../utils/filter.js';
 import { generateSort } from '../utils/sort.js';
 import { updateItem } from '../utils/event.js';
@@ -76,6 +76,10 @@ export default class EventsListPresenter {
     this.#currentFilterType = FILTERS[0].type;
     this.#currentSortType = SORTS[0].type;
     this.#reRenderEventList();
+    this.#clearFilters();
+    this.#clearSort();
+    this.#renderFilters();
+    this.#renderSort();
 
     if (!this.#newEventPresenter) {
       this.#newEventPresenter = new NewEventPresenter({
@@ -93,6 +97,7 @@ export default class EventsListPresenter {
   };
 
   #handleViewAction = (actionType, updateType, update) => {
+
     switch (actionType) {
       case UserAction.ADD_EVENT:
         this.#eventsModel.addEvent(updateType, update);
@@ -101,7 +106,7 @@ export default class EventsListPresenter {
         break;
 
       case UserAction.UPDATE_EVENT:
-        this.#eventsModel.updateEvent(updateType, update);
+        this.#eventsModel.updateEvent(update);
         this.#events = updateItem(this.#events, update);
 
         if (this.#eventPresenters.has(update.id)) {
@@ -149,11 +154,23 @@ export default class EventsListPresenter {
     }), this.#filtersElement);
   }
 
+  #clearFilters() {
+    const filtersElement = document.querySelector('.trip-controls__filters');
+    filtersElement.innerHTML = '';
+  }
+
   #renderSort() {
-    render(new SortView({
+    const sortView = new SortView({
       sorts: generateSort(),
       onSortChange: this.#handleSortChange,
-    }), this.#tripEventElement);
+    });
+
+    render(sortView, this.#tripEventElement, RenderPosition.AFTERBEGIN);
+  }
+
+  #clearSort() {
+    const sortElement = document.querySelector('.trip-events__trip-sort');
+    sortElement.innerHTML = ''; // Очистка содержимого перед новым рендером
   }
 
   #renderEventList() {
