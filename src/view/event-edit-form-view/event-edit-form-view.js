@@ -175,7 +175,7 @@ export default class EventEditFormView extends AbstractStatefulView {
     const selectedOffers = this._state.offers;
     const updatedEvent = {
       ...EventEditFormView.parseStateToEvent(this._state, this.#offers || []),
-      id: this._state.id || crypto.randomUUID(),
+      id: this._state.id && this._state.id,
       offers: selectedOffers,
     };
 

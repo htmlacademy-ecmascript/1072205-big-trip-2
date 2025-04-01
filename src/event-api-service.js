@@ -9,7 +9,7 @@ const Method = {
 
 export default class EventApiService extends ApiService {
   constructor() {
-    super('https://23.objects.htmlacademy.pro/big-trip', 'Basic eo0w590ik29889a'); // замените на свой токен
+    super('https://22.objects.htmlacademy.pro/big-trip', 'Basic eo0w590ik29889a'); // замените на свой токен
   }
 
   async getEvents() {
@@ -42,14 +42,16 @@ export default class EventApiService extends ApiService {
 
   async addEvent(event) {
     const adaptedEvent = this._adaptEventForServer(event);
+
     const response = await this._load({
       url: 'points',
-      method: Method.POST,
+      method: 'POST',
       body: JSON.stringify(adaptedEvent),
-      headers: new Headers({ 'Content-Type': 'application/json' }),
+      headers: new Headers({ 'Content-Type': 'application/json' })
     });
 
-    return this._adaptPointsData([await ApiService.parseResponse(response)])[0];
+    const newEventData = await ApiService.parseResponse(response);
+    return this._adaptPointsData([newEventData])[0];
   }
 
   async deleteEvent(eventId) {
@@ -62,13 +64,13 @@ export default class EventApiService extends ApiService {
   _adaptEventForServer(event) {
     return {
       id: event.id,
-      type: event.type,
+      type: event.type.toLowerCase(),
       base_price: event.basePrice,
       date_from: event.dateFrom.toISOString(),
       date_to: event.dateTo.toISOString(),
       destination: event.destination,
       offers: Array.isArray(event.offers) ? event.offers : event.offers.map((offer) => offer.id),
-      is_favorite: event.isFavorite,
+      is_favorite: event.isFavorite ?? false,
     };
   }
 

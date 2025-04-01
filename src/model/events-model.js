@@ -36,6 +36,7 @@ export default class EventsModel extends Observable {
 
   async addEvent(newEvent) {
     try {
+      console.log('Отправляемые данные:', newEvent);
       const addedEvent = await this.#apiService.addEvent(newEvent);
       this.#events = [addedEvent, ...this.#events];
       this._notify(UpdateType.POST, addedEvent);
