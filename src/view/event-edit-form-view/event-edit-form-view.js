@@ -3,6 +3,7 @@ import { createEventEditFormTemplate } from './event-edit-form-view-template.js'
 import { EVENT_TYPES } from '../../const.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
+import '../../framework/view/abstract-view.css';
 
 const BLANK_EVENT = {
   id: '',
@@ -41,28 +42,6 @@ export default class EventEditFormView extends AbstractStatefulView {
     return createEventEditFormTemplate(this._state, this.#destinations, this.#offers, this._isSaving, this._isDeleting);
   }
 
-  setSavingState() {
-    this._isSaving = true;
-    this.updateElement();
-  }
-
-  setDeletingState() {
-    this._isDeleting = true;
-    this.updateElement();
-  }
-
-  resetState() {
-    this._isSaving = false;
-    this._isDeleting = false;
-    this.updateElement();
-  }
-
-  shakeForm() {
-    const formElement = this.element.querySelector('.event--edit');
-    formElement.classList.add('shake');
-    setTimeout(() => formElement.classList.remove('shake'), 600);
-  }
-
   updateElement(updatedState) {
     super.updateElement(updatedState);
     this._restoreHandlers();
@@ -97,7 +76,6 @@ export default class EventEditFormView extends AbstractStatefulView {
     }
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
   }
-
 
   #eventTypeChangeHandler = (evt) => {
     const newType = evt.target.value;
@@ -183,16 +161,53 @@ export default class EventEditFormView extends AbstractStatefulView {
     });
   };
 
-  #formSubmitHandler = (evt) => {
+  unlockForm = () => {
+    const saveButton = this.element.querySelector('.event__save-btn');
+    const deleteButton = this.element.querySelector('.event__reset-btn');
+    if (saveButton) {
+      saveButton.textContent = 'Save';
+      saveButton.disabled = false;
+    }
+    if (deleteButton) {
+      deleteButton.textContent = 'Delete';
+      deleteButton.disabled = false;
+    }
+  };
+
+  #shakeForm() {
+    const formElement = this.element.querySelector('.event--edit');
+    console.log('Элемент формы:', formElement);
+    formElement.classList.remove('shake');
+    formElement.classList.add('shake');
+  }
+
+#formSubmitHandler = async (evt) => {
     evt.preventDefault();
+    const saveButton = this.element.querySelector('.event__save-btn');
+    saveButton.textContent = 'Saving...';
+    saveButton.disabled = true;
+
     const selectedOffers = this._state.offers;
     const updatedEvent = {
       ...EventEditFormView.parseStateToEvent(this._state, this.#offers || []),
-      id: this._state.id && this._state.id,
+      // Убираем id, если оно отсутствует (для нового события)
+      ...(this._state.id && { id: this._state.id }), // Добавляем id только если оно есть
       offers: selectedOffers,
     };
 
-    this.#handleFormSubmit(updatedEvent);
+    try {
+      const response = await this.#handleFormSubmit(updatedEvent);
+
+      if (!response.ok || !response.status.toString().startsWith('2')) {
+        throw new Error(`Ошибка от сервера: ${response.statusText || 'Неизвестная ошибка'}`);
+      }
+
+      this.unlockForm();
+    } catch (error) {
+      console.log('Произошла ошибка:', error);  // Логируем ошибку
+      this.#shakeForm();
+      this.unlockForm();
+    }
   };
 
   #handleCancelClick = (evt) => {
@@ -200,17 +215,25 @@ export default class EventEditFormView extends AbstractStatefulView {
     this.#handleEditClick(EventEditFormView.parseStateToEvent(this._state));
   };
 
-  #deleteClickHandler = (evt) => {
+  #deleteClickHandler = async (evt) => {
     evt.preventDefault();
-    if (!this.#handleDeleteClick) {
-      return;
+    const resetButton = this.element.querySelector('.event__reset-btn');
+    if (resetButton.innerHTML === 'Delete') {
+      resetButton.textContent = 'Deleting...';
+      resetButton.disabled = true;
     }
-    this.#handleDeleteClick();
+    try {
+      await this.#handleDeleteClick(this._state.id);
+      this.unlockForm();
+    } catch (error) {
+      console.error('Ошибка при удалении события:', error);
+      this.unlockForm();
+    }
   };
 
   #editClickHandler = (evt) => {
     evt.preventDefault();
-    this.updateElement({ offers: this._state.offers }); // Обновляем состояние перед закрытием
+    this.updateElement({ offers: this._state.offers });
     this.#handleEditClick();
   };
 

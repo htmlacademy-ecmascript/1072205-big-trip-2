@@ -4,13 +4,15 @@ import EventEditFormView from '../view/event-edit-form-view/event-edit-form-view
 import { EVENT_TYPES } from '../const.js';
 
 export default class NewEventPresenter {
+  #events = null;  // Инициализируем приватное свойство
   #destinations = [];
   #offers = [];
   #onDataChange = null;
   #onCloseForm = null;
   #eventEditFormComponent = null;
 
-  constructor({ destinationsModel, offersModel, onDataChange, onCloseForm }) {
+  constructor({ eventsModel, destinationsModel, offersModel, onDataChange, onCloseForm }) {
+    this.#events = eventsModel;  // Теперь переменная #events определена
     this.#destinations = destinationsModel;
     this.#offers = offersModel;
     this.#onDataChange = onDataChange;
@@ -39,9 +41,15 @@ export default class NewEventPresenter {
     render(this.#eventEditFormComponent, document.querySelector('.trip-events__list'), RenderPosition.AFTERBEGIN);
   }
 
-  #formSubmitHandler = (updatedEvent) => {
-    this.#onDataChange(UserAction.ADD_EVENT, UpdateType.MINOR, updatedEvent);
-    this.#handleCloseFormClick();
+  #formSubmitHandler = async (newEvent) => {
+    try {
+      //this.#eventEditFormComponent.lockForm(); // нет такого метода
+      const newEventFromServer = await this.#events.addEvent(newEvent);
+      this.#onDataChange(UserAction.ADD_EVENT, UpdateType.MINOR, newEventFromServer);
+      this.destroy();
+    } catch (error) {
+      this.#eventEditFormComponent.unlockForm();
+    }
   };
 
   #handleCloseFormClick = () => {
