@@ -11,7 +11,7 @@ export default class PagePresenter {
   #destinations = [];
   #offers = [];
   #eventPresenters = new Map();
-
+  #tripInfoComponent = null;
   #tripMainElement = null;
   #eventListPresenter = null;
   #tripEventElement = null;
@@ -83,21 +83,19 @@ export default class PagePresenter {
   }
 
   #renderTripInfo() {
-    render(
-      new TripInfoView(
-        this.#events,
-        this.#destinations,
-        this.#offers,
-      ),
-      this.#tripMainElement,
-      RenderPosition.AFTERBEGIN
-    );
+    if (this.#tripInfoComponent) {
+      this.#tripInfoComponent.element.remove(); // Сначала удаляем старый компонент
+      this.#tripInfoComponent = null;
+    }
+
+    this.#tripInfoComponent = new TripInfoView(this.#events, this.#destinations, this.#offers);
+    render(this.#tripInfoComponent, this.#tripMainElement, RenderPosition.AFTERBEGIN);
   }
 
   #renderFilters() {
     const filters = FILTERS.map((filter) => ({
       ...filter,
-      isDisabled: this.#events.every((event) => !this.#applyFilter(event, filter.type)),
+      isDisabled: this.#applyFilter(this.#events, filter.type).length === 0,
     }));
 
     render(new FiltersView({
@@ -107,9 +105,11 @@ export default class PagePresenter {
     }), document.querySelector('.trip-controls__filters'));
   }
 
-  #applyFilter(filterType) {
+  #applyFilter(events, filterType) {
+    if (!Array.isArray(events)) return [];
+
     const now = new Date();
-    return this.#events.filter((event) => {
+    return events.filter((event) => {
       return {
         future: event.dateFrom > now,
         present: event.dateFrom <= now && event.dateTo >= now,
@@ -120,15 +120,11 @@ export default class PagePresenter {
 
   #handleFilterChange = (filterType) => {
     this.#currentFilterType = filterType;
+    this.#updateData();
     this.#clearEventList();
     this.#renderEventList();
+    this.#renderSort();
   };
-
-  // #renderSort() {
-  //   const sortView = new SortView({
-  //     sorts: generateSort(),
-  //     onSortChange: this.#handleSortChange,
-  //   });
 
   #renderSort() {
     render(new SortView({
@@ -139,21 +135,27 @@ export default class PagePresenter {
   }
 
   #applySort(events, sortType) {
-    const sortFunction = SORTS.find((sortItem) => sortItem.type === sortType)?.sort || (() => 0);
-    return events.sort(sortFunction);
+    if (sortType === 'price') {
+      return [...events].sort((a, b) => b.basePrice - a.basePrice);
+    }
+    if (sortType === 'time') {
+      return [...events].sort((a, b) => (b.dateTo - b.dateFrom) - (a.dateTo - a.dateFrom));
+    }
+    return [...events];
   }
 
   #handleSortChange = (sortType) => {
-    if (this.#currentSortType !== sortType) {
-      this.#currentSortType = sortType;
-      this.#clearEventList();
-      this.#renderEventList();
-    }
-  }
+    this.#currentSortType = sortType;
+    this.#updateData();
+    this.#clearEventList();
+    this.#renderEventList();
+    this.#renderSort();
+  };
 
   #getFilteredAndSortedEvents() {
-    const filteredEvents = this.#applyFilter(this.#events, this.#currentFilterType);
-    return this.#applySort(filteredEvents, this.#currentSortType);
+    const filteredEvents = this.#events.filter((event) => this.#applyFilter(event, this.#currentFilterType));
+    const sortedEvents = this.#applySort(filteredEvents, this.#currentSortType);
+    return sortedEvents;
   }
 
   #renderEventList() {
@@ -169,6 +171,6 @@ export default class PagePresenter {
   #clearEventList() {
     this.#eventPresenters.forEach((presenter) => presenter.destroy());
     this.#eventPresenters.clear();
-    // this.#eventListComponent.clear();
+    this.#tripEventElement.innerHTML = '';
   }
 }

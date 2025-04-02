@@ -1,10 +1,8 @@
-import { render, RenderPosition } from '../framework/render.js';
+import { FILTERS } from '../const.js';
+import { render } from '../framework/render.js';
 import EventListView from '../view/event-list-view.js';
 import EventPresenter from './event-presenter.js';
 import NewEventPresenter from './new-event-presenter.js';
-// import { generateFilter } from '../utils/filter.js';
-// import { generateSort } from '../utils/sort.js';
- import { SORTS, FILTERS, UserAction } from '../const.js';
 
 export default class EventsListPresenter {
   #events = [];
@@ -15,7 +13,7 @@ export default class EventsListPresenter {
   #tripEventElement;
   #filtersElement;
   #newEventPresenter = null;
-   #currentFilterType = FILTERS[0].type;
+  #currentFilterType = FILTERS[0].type;
   // #currentSortType = SORTS[0].type;
   // #onDataChange;
 
@@ -84,8 +82,6 @@ export default class EventsListPresenter {
   // #clearFilters() {
   //   this.#filtersElement.innerHTML = '';
   // }
-
-
 
   //   render(sortView, this.#tripEventElement, RenderPosition.AFTERBEGIN);
   // }
