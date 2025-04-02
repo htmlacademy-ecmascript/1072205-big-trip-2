@@ -23,6 +23,8 @@ export default class EventEditFormView extends AbstractStatefulView {
   #datepickerStart = null;
   #datepickerEnd = null;
   #handleDeleteClick = null;
+  _isSaving = false;
+  _isDeleting = false;
 
   constructor({ event = BLANK_EVENT, destinations, offers, onFormSubmit, onEditClick, onDeleteClick }) {
     super();
@@ -36,23 +38,33 @@ export default class EventEditFormView extends AbstractStatefulView {
   }
 
   get template() {
-    return createEventEditFormTemplate(this._state, this.#destinations, this.#offers);
+    return createEventEditFormTemplate(this._state, this.#destinations, this.#offers, this._isSaving, this._isDeleting);
   }
 
-  getUpdatedEvent() {
-    return {
-      ...this._state,
-    };
+  setSavingState() {
+    this._isSaving = true;
+    this.updateElement();
+  }
+
+  setDeletingState() {
+    this._isDeleting = true;
+    this.updateElement();
+  }
+
+  resetState() {
+    this._isSaving = false;
+    this._isDeleting = false;
+    this.updateElement();
+  }
+
+  shakeForm() {
+    const formElement = this.element.querySelector('.event--edit');
+    formElement.classList.add('shake');
+    setTimeout(() => formElement.classList.remove('shake'), 600);
   }
 
   updateElement(updatedState) {
     super.updateElement(updatedState);
-
-    this.element.querySelectorAll('.event__offer-checkbox').forEach((checkbox) => {
-      const offerId = checkbox.id;
-      checkbox.checked = this._state.offers.includes(offerId);
-    });
-
     this._restoreHandlers();
   }
 
@@ -85,6 +97,7 @@ export default class EventEditFormView extends AbstractStatefulView {
     }
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
   }
+
 
   #eventTypeChangeHandler = (evt) => {
     const newType = evt.target.value;
