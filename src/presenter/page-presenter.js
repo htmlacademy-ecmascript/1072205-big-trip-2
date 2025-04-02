@@ -24,13 +24,11 @@ export default class PagePresenter {
     this.eventsModel.addObserver(this.#handleModelUpdate);
   }
 
-  async init() {
-    try {
-      this.#events = await this.eventsModel.events;
-      this.#destinations = await this.destinationsModel.destinations;
-      this.#offers = await this.offersModel.offers;
-    } catch (error) {
-      throw new Error('Данные не инициализированы');
+  init() {
+    this.#updateData();
+
+    if (!this.#isDataLoaded()) {
+      return;
     }
 
     if (this.#events.length === 0) {
@@ -47,16 +45,30 @@ export default class PagePresenter {
   }
 
   #handleModelUpdate = () => {
-    this.#events = [...this.eventsModel.events];
+    this.#updateData();
+
+    if (!this.#isDataLoaded()) {
+      return;
+    }
 
     if (this.#events.length === 0) {
       this.#tripEventElement.innerHTML = '';
       this.#renderNoEvent();
     } else {
       this.#renderTripInfo();
-      this.#eventListPresenter.updateEvents(this.#events);
+      this.#renderEventList();
     }
   };
+
+  #updateData() {
+    this.#events = [...this.eventsModel.events];
+    this.#destinations = [...this.destinationsModel.destinations];
+    this.#offers = [...this.offersModel.offers];
+  }
+
+  #isDataLoaded() {
+    return this.#events.length > 0 && this.#destinations.length > 0 && this.#offers.length > 0;
+  }
 
   #renderNoEvent() {
     render(new NoEventView(), this.#tripEventElement);
@@ -64,11 +76,11 @@ export default class PagePresenter {
 
   #renderTripInfo() {
     render(
-      new TripInfoView({
-        events: this.#events,
-        destinations: this.#destinations,
-        offers: this.#offers,
-      }),
+      new TripInfoView(
+        this.#events,
+        this.#destinations,
+        this.#offers,
+      ),
       this.#tripMainElement,
       RenderPosition.AFTERBEGIN
     );

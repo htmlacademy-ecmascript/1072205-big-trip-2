@@ -33,8 +33,8 @@ export default class EventPresenter {
 
     this.#event = event;
     this.#events = eventsModel;
-    this.#destinations = destinationsModel;
-    this.#offers = offersModel;
+    this.#destinations = destinationsModel.destinations;
+    this.#offers = offersModel.offers;
     this.#onDataChange = onDataChange;
     this.#onResetView = onResetView;
     const prevEventComponent = this.#eventComponent;

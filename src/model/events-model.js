@@ -9,8 +9,8 @@ export default class EventsModel extends Observable {
   async init() {
     try {
       this.#events = await this.#apiService.getEvents();
-      this._notify(UpdateType.INIT, this.#events);
-    } catch (err) {
+      this._notify(UpdateType.INIT);
+    } catch (error) {
       this.#events = [];
     }
   }

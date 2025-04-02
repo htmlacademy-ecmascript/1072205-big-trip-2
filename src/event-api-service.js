@@ -50,6 +50,7 @@ export default class EventApiService extends ApiService {
     });
 
     const newEventData = await ApiService.parseResponse(response);
+    console.log(newEventData);
     return this._adaptPointsData([newEventData])[0];
   }
 
