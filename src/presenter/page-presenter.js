@@ -10,8 +10,8 @@ export default class PagePresenter {
   #eventPresenters = new Map();
 
   #tripMainElement = null;
-  #tripEventElement = null;
   #eventListPresenter = null;
+  #tripEventElement = null;
 
   constructor(eventsModel, destinationsModel, offersModel) {
     this.eventsModel = eventsModel;
@@ -20,19 +20,17 @@ export default class PagePresenter {
 
     this.#tripMainElement = document.querySelector('.trip-main');
     this.#tripEventElement = document.querySelector('.trip-events');
+
+    this.eventsModel.addObserver(this.#handleModelUpdate);
   }
 
   async init() {
-    if (!this.eventsModel || !this.destinationsModel || !this.offersModel) {
-      throw new Error('Модели не инициализированы');
-    }
-
     try {
       this.#events = await this.eventsModel.events;
       this.#destinations = await this.destinationsModel.destinations;
       this.#offers = await this.offersModel.offers;
     } catch (error) {
-      //console.log('Данные не получены');
+      throw new Error('Данные не инициализированы');
     }
 
     if (this.#events.length === 0) {
@@ -45,16 +43,23 @@ export default class PagePresenter {
   }
 
   updateEvent(updatedEvent) {
-    this.#events = this.#events.map((event) =>
-      event.id === updatedEvent.id ? updatedEvent : event
-    );
-    this.#eventPresenters.get(updatedEvent.id)?.update(updatedEvent);
+    this.eventsModel.updateEvent(updatedEvent);
   }
 
-  #renderNoEvent() {
+  #handleModelUpdate = () => {
+    this.#events = [...this.eventsModel.events];
+
     if (this.#events.length === 0) {
-      render(new NoEventView(), this.#tripEventElement);
+      this.#tripEventElement.innerHTML = '';
+      this.#renderNoEvent();
+    } else {
+      this.#renderTripInfo();
+      this.#eventListPresenter.updateEvents(this.#events);
     }
+  };
+
+  #renderNoEvent() {
+    render(new NoEventView(), this.#tripEventElement);
   }
 
   #renderTripInfo() {
@@ -70,9 +75,11 @@ export default class PagePresenter {
   }
 
   #renderEventList() {
-    this.#eventListPresenter = new EventsListPresenter(this.eventsModel, this.destinationsModel, this.offersModel);
-    this.#eventListPresenter.init();
-
-    this.#eventPresenters = this.#eventListPresenter.getEventPresenters();
+    this.#eventListPresenter = new EventsListPresenter(
+      this.eventsModel,
+      this.destinationsModel,
+      this.offersModel
+    );
+    this.#eventListPresenter.init(this.#events);
   }
 }
