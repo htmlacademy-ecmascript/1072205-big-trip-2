@@ -11,7 +11,7 @@ export default class DestinationsModel extends Observable {
       this.#destinations = await this.#apiService.getDestinations();
       this._notify(UpdateType.INIT);
     } catch (err) {
-      console.error('Failed to load destinations:', err);
+      //console.error('Failed to load destinations:', err);
     }
   }
 

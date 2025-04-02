@@ -157,7 +157,7 @@ export default class EventEditFormView extends AbstractStatefulView {
     this.updateElement({
       offers: checked
         ? [...this._state.offers, offerId]
-        : this._state.offers.filter(id => id !== offerId),
+        : this._state.offers.filter((id) => id !== offerId),
     });
   };
 
@@ -166,34 +166,37 @@ export default class EventEditFormView extends AbstractStatefulView {
     const deleteButton = this.element.querySelector('.event__reset-btn');
     if (saveButton) {
       saveButton.textContent = 'Save';
-      saveButton.disabled = false;
     }
     if (deleteButton) {
       deleteButton.textContent = 'Delete';
-      deleteButton.disabled = false;
     }
+    deleteButton.disabled = false;
+    saveButton.disabled = false;
   };
 
   #shakeForm() {
     const formElement = this.element.querySelector('.event--edit');
-    console.log('Элемент формы:', formElement);
     formElement.classList.remove('shake');
     formElement.classList.add('shake');
   }
 
-#formSubmitHandler = async (evt) => {
+  #formSubmitHandler = async (evt) => {
     evt.preventDefault();
     const saveButton = this.element.querySelector('.event__save-btn');
+    const resetButton = this.element.querySelector('.event__reset-btn');
     saveButton.textContent = 'Saving...';
     saveButton.disabled = true;
+    resetButton.disabled = true;
 
     const selectedOffers = this._state.offers;
     const updatedEvent = {
       ...EventEditFormView.parseStateToEvent(this._state, this.#offers || []),
-      // Убираем id, если оно отсутствует (для нового события)
       ...(this._state.id && { id: this._state.id }), // Добавляем id только если оно есть
       offers: selectedOffers,
     };
+    if (updatedEvent.id === undefined) {
+      delete updatedEvent.id;
+    }
 
     try {
       const response = await this.#handleFormSubmit(updatedEvent);
@@ -204,7 +207,6 @@ export default class EventEditFormView extends AbstractStatefulView {
 
       this.unlockForm();
     } catch (error) {
-      console.log('Произошла ошибка:', error);  // Логируем ошибку
       this.#shakeForm();
       this.unlockForm();
     }
@@ -218,15 +220,16 @@ export default class EventEditFormView extends AbstractStatefulView {
   #deleteClickHandler = async (evt) => {
     evt.preventDefault();
     const resetButton = this.element.querySelector('.event__reset-btn');
+    const saveButton = this.element.querySelector('.event__save-btn');
     if (resetButton.innerHTML === 'Delete') {
       resetButton.textContent = 'Deleting...';
       resetButton.disabled = true;
+      saveButton.disabled = true;
     }
     try {
       await this.#handleDeleteClick(this._state.id);
       this.unlockForm();
     } catch (error) {
-      console.error('Ошибка при удалении события:', error);
       this.unlockForm();
     }
   };

@@ -11,7 +11,6 @@ export default class EventsModel extends Observable {
       this.#events = await this.#apiService.getEvents();
       this._notify(UpdateType.INIT, this.#events);
     } catch (err) {
-      console.error('Ошибка загрузки данных:', err);
       this.#events = [];
     }
   }
@@ -30,18 +29,17 @@ export default class EventsModel extends Observable {
       }
       return updatedEvent;
     } catch (err) {
-      console.error('Ошибка при обновлении события:', err);
+      //console.error('Ошибка при обновлении события:', err);
     }
   }
 
   async addEvent(newEvent) {
     try {
-      console.log('Отправляемые данные:', newEvent);
       const addedEvent = await this.#apiService.addEvent(newEvent);
       this.#events = [addedEvent, ...this.#events];
       this._notify(UpdateType.POST, addedEvent);
     } catch (err) {
-      console.error('Ошибка при добавлении события:', err);
+      //console.error('Ошибка при добавлении события:', err);
     }
   }
 
@@ -51,7 +49,7 @@ export default class EventsModel extends Observable {
       this.#events = this.#events.filter((event) => event.id !== eventId);
       this._notify(UpdateType.PATCH, eventId);
     } catch (err) {
-      console.error('Ошибка при удалении события:', err);
+      //console.error('Ошибка при удалении события:', err);
     }
   }
 }

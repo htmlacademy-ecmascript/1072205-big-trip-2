@@ -1,4 +1,4 @@
-import ApiService from "./framework/api-service";
+import ApiService from './framework/api-service';
 
 const Method = {
   GET: 'GET',
@@ -42,7 +42,6 @@ export default class EventApiService extends ApiService {
 
   async addEvent(event) {
     const adaptedEvent = this._adaptEventForServer(event);
-
     const response = await this._load({
       url: 'points',
       method: 'POST',

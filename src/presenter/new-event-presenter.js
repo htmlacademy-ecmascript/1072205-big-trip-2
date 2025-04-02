@@ -1,10 +1,9 @@
 import { render, remove, RenderPosition } from '../framework/render.js';
-import { UserAction, UpdateType } from '../const.js';
 import EventEditFormView from '../view/event-edit-form-view/event-edit-form-view.js';
 import { EVENT_TYPES } from '../const.js';
 
 export default class NewEventPresenter {
-  #events = null;  // Инициализируем приватное свойство
+  #events = null;
   #destinations = [];
   #offers = [];
   #onDataChange = null;
@@ -12,7 +11,7 @@ export default class NewEventPresenter {
   #eventEditFormComponent = null;
 
   constructor({ eventsModel, destinationsModel, offersModel, onDataChange, onCloseForm }) {
-    this.#events = eventsModel;  // Теперь переменная #events определена
+    this.#events = eventsModel;
     this.#destinations = destinationsModel;
     this.#offers = offersModel;
     this.#onDataChange = onDataChange;
@@ -31,6 +30,7 @@ export default class NewEventPresenter {
         dateTo: '',
         basePrice: 0,
         offers: defaultOffers,
+        isFavorite: false,
       },
       destinations: this.#destinations,
       offers: this.#offers,
@@ -43,12 +43,13 @@ export default class NewEventPresenter {
 
   #formSubmitHandler = async (newEvent) => {
     try {
-      //this.#eventEditFormComponent.lockForm(); // нет такого метода
-      const newEventFromServer = await this.#events.addEvent(newEvent);
-      this.#onDataChange(UserAction.ADD_EVENT, UpdateType.MINOR, newEventFromServer);
+      const response = await this.#events.addEvent(newEvent);
+
       this.destroy();
+      document.querySelector('.trip-main__event-add-btn').disabled = false;
     } catch (error) {
       this.#eventEditFormComponent.unlockForm();
+      this.#eventEditFormComponent.shakeForm();
     }
   };
 
