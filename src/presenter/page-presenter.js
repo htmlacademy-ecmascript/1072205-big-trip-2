@@ -44,8 +44,8 @@ export default class PagePresenter {
 
     this.#renderTripInfo();
     this.#renderFilters();
-    this.#renderSort();
     this.#renderEventList();
+    this.#renderSort();
   }
 
   updateEvent(updatedEvent) {
@@ -162,8 +162,10 @@ export default class PagePresenter {
     this.#eventListPresenter = new EventsListPresenter(
       this.eventsModel,
       this.destinationsModel,
-      this.offersModel
+      this.offersModel,
+      this.#handleViewAction,
     );
+
     const filteredAndSortedEvents = this.#getFilteredAndSortedEvents();
     this.#eventListPresenter.init(filteredAndSortedEvents);
   }
@@ -171,6 +173,9 @@ export default class PagePresenter {
   #clearEventList() {
     this.#eventPresenters.forEach((presenter) => presenter.destroy());
     this.#eventPresenters.clear();
-    this.#tripEventElement.innerHTML = '';
   }
+
+  #handleViewAction = (update) => {
+    this.updateEvent(update);
+  };
 }

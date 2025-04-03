@@ -19,11 +19,12 @@ export default class EventPresenter {
   static #currentlyEditing = null;
   #eventsModel = null;
 
-  constructor(container, renderEventList, eventsModel, handleViewAction) {
+  constructor(container, renderEventList, eventsModel, onDataChange, onResetView) {
     this.#tripEventsListElement = container;
     this.renderEventList = renderEventList;
     this.#eventsModel = eventsModel;
-    this.#handleViewAction = handleViewAction;
+    this.#onDataChange = onDataChange;
+    this.#onResetView = onResetView;
   }
 
   init(event, eventsModel, destinationsModel, offersModel, onDataChange, onResetView) {
@@ -86,6 +87,11 @@ export default class EventPresenter {
   }
 
   #handleFavoriteClick = () => {
+    if (!this.#onDataChange) {
+      console.error('Ошибка: #onDataChange не определен в EventPresenter');
+      return;
+    }
+
     const updatedEvent = {
       ...this.#event,
       isFavorite: !this.#event.isFavorite,
@@ -96,6 +102,7 @@ export default class EventPresenter {
 
     const updatedEventFromServer = this.#eventsModel.updateEvent(updatedEvent);
     this.#eventComponent.updateFavoriteButton(updatedEventFromServer.isFavorite);
+
     this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, updatedEventFromServer);
   };
 
