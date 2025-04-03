@@ -19,7 +19,7 @@ export default class PagePresenter {
     this.offersModel = offersModel;
 
     this.#tripMainElement = document.querySelector('.trip-main');
-    this.#tripEventElement = document.querySelector('.trip-events'); 
+    this.#tripEventElement = document.querySelector('.trip-events');
   }
 
   async init() {
@@ -32,7 +32,7 @@ export default class PagePresenter {
       this.#destinations = await this.destinationsModel.destinations;
       this.#offers = await this.offersModel.offers;
     } catch (error) {
-      console.log('Данные не получены');
+      //console.log('Данные не получены');
     }
 
     if (this.#events.length === 0) {

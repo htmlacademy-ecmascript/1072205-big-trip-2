@@ -3,7 +3,7 @@ import { humanizeDate, eventDuration, isEventFavorite } from '../../utils/event'
 const EVENT_DATE_FORMAT = 'MMM DD';
 
 function createEventOffersTemplate(selectedOffers) {
-return selectedOffers && selectedOffers.map((offer) =>
+  return selectedOffers && selectedOffers.map((offer) =>
     `<li class="event__offer">
       <span class="event__offer-title">${offer.title}</span>
       &plus;&euro;&nbsp;

@@ -11,7 +11,6 @@ export default class EventsModel extends Observable {
       this.#events = await this.#apiService.getEvents();
       this._notify(UpdateType.INIT, this.#events);
     } catch (err) {
-      console.error('Ошибка загрузки данных:', err);
       this.#events = [];
     }
   }
@@ -30,20 +29,27 @@ export default class EventsModel extends Observable {
       }
       return updatedEvent;
     } catch (err) {
-      console.error('Ошибка при обновлении события:', err);
+      //console.error('Ошибка при обновлении события:', err);
     }
   }
 
-  addEvent(updateType, newEvent) {
-    this.#events = [newEvent, ...this.#events];
-    this._notify(updateType, newEvent);
+  async addEvent(newEvent) {
+    try {
+      const addedEvent = await this.#apiService.addEvent(newEvent);
+      this.#events = [addedEvent, ...this.#events];
+      this._notify(UpdateType.POST, addedEvent);
+    } catch (err) {
+      //console.error('Ошибка при добавлении события:', err);
+    }
   }
 
-  deleteEvent(eventId) {
-    const index = this.#events.findIndex((event) => event.id === eventId);
-    if (index !== -1) {
-      this.#events.splice(index, 1);
+  async deleteEvent(eventId) {
+    try {
+      await this.#apiService.deleteEvent(eventId);
+      this.#events = this.#events.filter((event) => event.id !== eventId);
+      this._notify(UpdateType.PATCH, eventId);
+    } catch (err) {
+      //console.error('Ошибка при удалении события:', err);
     }
-    this._notify(UpdateType.PATCH, eventId);
   }
 }

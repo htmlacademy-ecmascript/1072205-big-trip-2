@@ -1,16 +1,17 @@
 import { render, remove, RenderPosition } from '../framework/render.js';
-import { UserAction, UpdateType } from '../const.js';
 import EventEditFormView from '../view/event-edit-form-view/event-edit-form-view.js';
 import { EVENT_TYPES } from '../const.js';
 
 export default class NewEventPresenter {
+  #events = null;
   #destinations = [];
   #offers = [];
   #onDataChange = null;
   #onCloseForm = null;
   #eventEditFormComponent = null;
 
-  constructor({ destinationsModel, offersModel, onDataChange, onCloseForm }) {
+  constructor({ eventsModel, destinationsModel, offersModel, onDataChange, onCloseForm }) {
+    this.#events = eventsModel;
     this.#destinations = destinationsModel;
     this.#offers = offersModel;
     this.#onDataChange = onDataChange;
@@ -25,10 +26,11 @@ export default class NewEventPresenter {
       event: {
         type: defaultType,
         destination: '',
-        startDate: '',
-        endDate: '',
-        cost: 0,
+        dateFrom: '',
+        dateTo: '',
+        basePrice: 0,
         offers: defaultOffers,
+        isFavorite: false,
       },
       destinations: this.#destinations,
       offers: this.#offers,
@@ -39,9 +41,16 @@ export default class NewEventPresenter {
     render(this.#eventEditFormComponent, document.querySelector('.trip-events__list'), RenderPosition.AFTERBEGIN);
   }
 
-  #formSubmitHandler = (updatedEvent) => {
-    this.#onDataChange(UserAction.ADD_EVENT, UpdateType.MINOR, updatedEvent);
-    this.#handleCloseFormClick();
+  #formSubmitHandler = async (newEvent) => {
+    try {
+      const response = await this.#events.addEvent(newEvent);
+
+      this.destroy();
+      document.querySelector('.trip-main__event-add-btn').disabled = false;
+    } catch (error) {
+      this.#eventEditFormComponent.unlockForm();
+      this.#eventEditFormComponent.shakeForm();
+    }
   };
 
   #handleCloseFormClick = () => {

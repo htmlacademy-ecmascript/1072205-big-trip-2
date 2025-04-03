@@ -3,6 +3,7 @@ import { createEventEditFormTemplate } from './event-edit-form-view-template.js'
 import { EVENT_TYPES } from '../../const.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
+import '../../framework/view/abstract-view.css';
 
 const BLANK_EVENT = {
   id: '',
@@ -23,6 +24,8 @@ export default class EventEditFormView extends AbstractStatefulView {
   #datepickerStart = null;
   #datepickerEnd = null;
   #handleDeleteClick = null;
+  _isSaving = false;
+  _isDeleting = false;
 
   constructor({ event = BLANK_EVENT, destinations, offers, onFormSubmit, onEditClick, onDeleteClick }) {
     super();
@@ -36,23 +39,11 @@ export default class EventEditFormView extends AbstractStatefulView {
   }
 
   get template() {
-    return createEventEditFormTemplate(this._state, this.#destinations, this.#offers);
-  }
-
-  getUpdatedEvent() {
-    return {
-      ...this._state,
-    };
+    return createEventEditFormTemplate(this._state, this.#destinations, this.#offers, this._isSaving, this._isDeleting);
   }
 
   updateElement(updatedState) {
     super.updateElement(updatedState);
-
-    this.element.querySelectorAll('.event__offer-checkbox').forEach((checkbox) => {
-      const offerId = checkbox.id;
-      checkbox.checked = this._state.offers.includes(offerId);
-    });
-
     this._restoreHandlers();
   }
 
@@ -166,20 +157,59 @@ export default class EventEditFormView extends AbstractStatefulView {
     this.updateElement({
       offers: checked
         ? [...this._state.offers, offerId]
-        : this._state.offers.filter(id => id !== offerId),
+        : this._state.offers.filter((id) => id !== offerId),
     });
   };
 
-  #formSubmitHandler = (evt) => {
+  unlockForm = () => {
+    const saveButton = this.element.querySelector('.event__save-btn');
+    const deleteButton = this.element.querySelector('.event__reset-btn');
+    if (saveButton) {
+      saveButton.textContent = 'Save';
+    }
+    if (deleteButton) {
+      deleteButton.textContent = 'Delete';
+    }
+    deleteButton.disabled = false;
+    saveButton.disabled = false;
+  };
+
+  #shakeForm() {
+    const formElement = this.element.querySelector('.event--edit');
+    formElement.classList.remove('shake');
+    formElement.classList.add('shake');
+  }
+
+  #formSubmitHandler = async (evt) => {
     evt.preventDefault();
+    const saveButton = this.element.querySelector('.event__save-btn');
+    const resetButton = this.element.querySelector('.event__reset-btn');
+    saveButton.textContent = 'Saving...';
+    saveButton.disabled = true;
+    resetButton.disabled = true;
+
     const selectedOffers = this._state.offers;
     const updatedEvent = {
       ...EventEditFormView.parseStateToEvent(this._state, this.#offers || []),
-      id: this._state.id || crypto.randomUUID(),
+      ...(this._state.id && { id: this._state.id }), // Добавляем id только если оно есть
       offers: selectedOffers,
     };
+    if (updatedEvent.id === undefined) {
+      delete updatedEvent.id;
+    }
 
-    this.#handleFormSubmit(updatedEvent);
+    try {
+      const response = await this.#handleFormSubmit(updatedEvent);
+
+      if (!response.ok || !response.status.toString().startsWith('2')) {
+        throw new Error(`Ошибка от сервера: ${response.statusText || 'Неизвестная ошибка'}`);
+      }
+
+      this.unlockForm();
+    } catch (error) {
+      this.#shakeForm();
+      this.unlockForm();
+    }
   };
 
   #handleCancelClick = (evt) => {
@@ -187,17 +217,26 @@ export default class EventEditFormView extends AbstractStatefulView {
     this.#handleEditClick(EventEditFormView.parseStateToEvent(this._state));
   };
 
-  #deleteClickHandler = (evt) => {
+  #deleteClickHandler = async (evt) => {
     evt.preventDefault();
-    if (!this.#handleDeleteClick) {
-      return;
+    const resetButton = this.element.querySelector('.event__reset-btn');
+    const saveButton = this.element.querySelector('.event__save-btn');
+    if (resetButton.innerHTML === 'Delete') {
+      resetButton.textContent = 'Deleting...';
+      resetButton.disabled = true;
+      saveButton.disabled = true;
     }
-    this.#handleDeleteClick();
+    try {
+      await this.#handleDeleteClick(this._state.id);
+      this.unlockForm();
+    } catch (error) {
+      this.unlockForm();
+    }
   };
 
   #editClickHandler = (evt) => {
     evt.preventDefault();
-    this.updateElement({ offers: this._state.offers }); // Обновляем состояние перед закрытием
+    this.updateElement({ offers: this._state.offers });
     this.#handleEditClick();
   };
 

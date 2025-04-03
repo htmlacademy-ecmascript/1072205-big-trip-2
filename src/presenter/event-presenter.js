@@ -108,22 +108,26 @@ export default class EventPresenter {
     this.#replaceItemToForm();
   };
 
-  #handleFormSubmit = (updatedEvent) => {
-    this.#event = { ...this.#event, ...updatedEvent };
-    this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, updatedEvent);
-    if (this.#handleViewAction) {
-      this.#handleViewAction(UserAction.UPDATE_EVENT, UpdateType.MINOR, this.#event);
+  #handleFormSubmit = async (updatedEvent) => {
+    try {
+      const updatedEventFromServer = await this.#eventsModel.updateEvent(updatedEvent);
+      this.#event = updatedEventFromServer;
+      this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, updatedEventFromServer);
+      this.#eventEditFormComponent.unlockForm();
+      this.#replaceFormToItem();
+    } catch (error) {
+      this.#eventEditFormComponent.unlockForm();
     }
-    this.#replaceFormToItem();
   };
 
-  #handleDeleteClick = () => {
-    this.#onDataChange(UserAction.DELETE_EVENT, UpdateType.MINOR, this.#event);
-
-    if (this.#handleViewAction) {
-      this.#handleViewAction(UserAction.DELETE_EVENT, UpdateType.MINOR, this.#event);
+  #handleDeleteClick = async () => {
+    try {
+      await this.#eventsModel.deleteEvent(this.#event.id);
+      this.#eventEditFormComponent.unlockForm();
+      this.destroy();
+    } catch (error) {
+      this.#eventEditFormComponent.unlockForm();
     }
-    this.destroy();
   };
 
   #handleCloseClick = () => {

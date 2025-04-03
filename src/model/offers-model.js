@@ -11,7 +11,7 @@ export default class OffersModel extends Observable {
       this.#offers = await this.#apiService.getOffers();
       this._notify(UpdateType.INIT);
     } catch (err) {
-      console.error('Failed to load offers:', err);
+      //console.error('Failed to load offers:', err);
     }
   }
 
