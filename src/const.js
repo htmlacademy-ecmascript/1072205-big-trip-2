@@ -1,5 +1,12 @@
 const EVENT_TYPES = ['Taxi', 'Bus', 'Train', 'Ship', 'Drive', 'Flight', 'Check-in', 'Sightseeing', 'Restaurant'];
 
+const NoEventMessages = {
+  everything: 'Click New Event to create your first point',
+  past: 'There are no past events now',
+  present: 'There are no present events now',
+  future: 'There are no future events now',
+};
+
 const FILTERS = [
   {
     type: 'everything',
@@ -64,4 +71,4 @@ const UpdateType = {
   INIT: 'INIT',
 };
 
-export { EVENT_TYPES, FILTERS, SORTS, UserAction, UpdateType };
+export { EVENT_TYPES, NoEventMessages, FILTERS, SORTS, UserAction, UpdateType };

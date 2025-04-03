@@ -106,6 +106,11 @@ export default class EventPresenter {
   };
 
   #handleEditClick = () => {
+    const existingForms = document.querySelectorAll('.event--edit');
+    const addNewEventButton = document.querySelector('.trip-main__event-add-btn');
+    addNewEventButton.disabled = false;
+    existingForms.forEach((form) => form.remove());
+
     if (EventPresenter.#currentlyEditing) {
       EventPresenter.#currentlyEditing.#replaceFormToItem();
     }

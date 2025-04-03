@@ -83,6 +83,9 @@ export default class PagePresenter {
   }
 
   #handleNewEventClick = () => {
+    const existingForms = document.querySelectorAll('.event--edit');
+    existingForms.forEach((form) => form.remove());
+
     if (this.#newEventPresenter) {
       return;
     }
@@ -176,6 +179,7 @@ export default class PagePresenter {
 
   #handleFilterChange = (filterType) => {
     this.#currentFilterType = filterType;
+    this.#currentSortType = SORTS[0].type;
     this.#updateData();
     this.#clearEventList();
     this.#renderEventList();
