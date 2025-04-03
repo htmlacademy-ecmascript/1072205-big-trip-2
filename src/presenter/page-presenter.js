@@ -106,7 +106,9 @@ export default class PagePresenter {
   }
 
   #applyFilter(events, filterType) {
-    if (!Array.isArray(events)) return [];
+    if (!Array.isArray(events)) {
+      return [];
+    }
 
     const now = new Date();
     return events.filter((event) => {

@@ -88,7 +88,6 @@ export default class EventPresenter {
 
   #handleFavoriteClick = () => {
     if (!this.#onDataChange) {
-      console.error('Ошибка: #onDataChange не определен в EventPresenter');
       return;
     }
 

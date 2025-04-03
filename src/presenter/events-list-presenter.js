@@ -3,6 +3,7 @@ import { render } from '../framework/render.js';
 import EventListView from '../view/event-list-view.js';
 import EventPresenter from './event-presenter.js';
 import NewEventPresenter from './new-event-presenter.js';
+import { remove } from '../framework/render.js';
 
 export default class EventsListPresenter {
   #events = [];
@@ -16,13 +17,15 @@ export default class EventsListPresenter {
   #currentFilterType = FILTERS[0].type;
   #onDataChange = null;
   #resetView = null;
+  #clearExistingForms = null;
 
-  constructor(eventsModel, destinationsModel, offersModel, onDataChange, resetView) {
+  constructor(eventsModel, destinationsModel, offersModel, onDataChange, resetView, clearExistingForms) {
     this.eventsModel = eventsModel;
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
     this.#onDataChange = onDataChange;
     this.#resetView = resetView;
+    this.#clearExistingForms = clearExistingForms;
   }
 
   init(events) {
@@ -53,8 +56,13 @@ export default class EventsListPresenter {
   };
 
   #handleCloseForm = () => {
-    this.#newEventPresenter = null;
-    document.querySelector('.trip-main__event-add-btn').disabled = false;
+    const existingForms = document.querySelectorAll('.event-edit-form');
+
+    existingForms.forEach((form) => {
+      remove(form);
+      this.#newEventPresenter = null;
+      document.querySelector('.trip-main__event-add-btn').disabled = false;
+    });
   };
 
   #renderEventList() {

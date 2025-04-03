@@ -21,7 +21,9 @@ export default class NewEventPresenter {
   }
 
   init() {
-    if (this.#isFormOpen) return;
+    if (this.#isFormOpen) {
+      return;
+    }
 
     this.#isFormOpen = true;
 

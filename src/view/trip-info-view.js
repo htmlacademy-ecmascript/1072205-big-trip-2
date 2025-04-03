@@ -3,7 +3,7 @@ import { humanizeDate } from '../utils/event';
 
 const EVENT_DATE_FORMAT = 'DD MMM';
 
-function createTripInfoTemplate(events, destinations, offers) {
+function createTripInfoTemplate(events, destinations) {
   if (!events.length) {
     return '';
   }
@@ -49,7 +49,7 @@ export default class TripInfoView extends AbstractView {
   #destinations;
   #offers;
 
-  constructor( events, destinations, offers ) {
+  constructor(events, destinations, offers) {
     super();
     this.#events = events;
     this.#destinations = destinations;
