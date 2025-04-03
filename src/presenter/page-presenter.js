@@ -84,7 +84,7 @@ export default class PagePresenter {
 
   #renderTripInfo() {
     if (this.#tripInfoComponent) {
-      this.#tripInfoComponent.element.remove(); // Сначала удаляем старый компонент
+      this.#tripInfoComponent.element.remove();
       this.#tripInfoComponent = null;
     }
 

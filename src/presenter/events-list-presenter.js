@@ -41,13 +41,20 @@ export default class EventsListPresenter {
       eventsModel: this.eventsModel,
       destinationsModel: this.#destinationsModel,
       offersModel: this.#offersModel,
+      onDataChange: this.#onDataChange,
+      onCloseForm: this.#handleCloseForm,
     });
 
     this.#newEventPresenter.init();
   };
 
+  #handleCloseForm = () => {
+    this.#newEventPresenter = null;
+    document.querySelector('.trip-main__event-add-btn').disabled = false;
+  };
+
   #renderEventList() {
-    this.#clearEventList(); // Очистка перед повторным рендерингом
+    this.#clearEventList();
 
     if (!this.#events.length) {
       document.querySelector(`#filter-${this.#currentFilterType}`).disabled = true;
@@ -61,10 +68,10 @@ export default class EventsListPresenter {
   #renderEvent(event) {
     const eventPresenter = new EventPresenter(
       this.#tripEventElement.querySelector('.trip-events__list'),
-      this.renderEventList,  // Передаем функцию рендеринга
-      this.eventsModel,  // Передаем модель событий
-      this.#onDataChange,  // Передаем обработчик данных
-      this.#resetView // Передаем метод сброса
+      this.renderEventList,
+      this.eventsModel,
+      this.#onDataChange,
+      this.#resetView,
     );
 
     eventPresenter.init(event, this.eventsModel, this.#destinationsModel, this.#offersModel, this.#onDataChange, this.#resetView);
@@ -82,41 +89,3 @@ export default class EventsListPresenter {
     this.#tripEventElement.innerHTML = '';
   }
 }
-
-
-  // #closeNewEventForm = () => {
-  //   this.#newEventPresenter?.destroy();
-  //   this.#newEventPresenter = null;
-  //   document.removeEventListener('keydown', this.#handleEscKeyDown);
-  //   document.querySelector('.trip-main__event-add-btn').disabled = false;
-  //   this.#reRenderEventList();
-  // };
-
-  // #reRenderEventList() {
-  //   this.#clearEventList();
-  //   //this.#updateData();
-  //   this.#renderEventList();
-  // }
-
-  // #handleNewEventClick = () => {
-  //   this.#currentFilterType = FILTERS[0].type;
-  //   this.#currentSortType = SORTS[0].type;
-  //   this.#clearFilters();
-  //   this.#clearSort();
-  //   this.#renderFilters();
-  //   this.#renderSort();
-
-  //   if (!this.#newEventPresenter) {
-  //     this.#newEventPresenter = new NewEventPresenter({
-  //       eventsModel: this.eventsModel,
-  //       destinationsModel: this.#destinationsModel,
-  //       offersModel: this.#offersModel,
-  //       onDataChange: this.#handleViewAction,
-  //       onCloseForm: this.#closeNewEventForm,
-  //     });
-  //   }
-
-  //   this.#newEventPresenter.init();
-  //   document.addEventListener('keydown', this.#handleEscKeyDown);
-  //   document.querySelector('.trip-main__event-add-btn').disabled = true;
-  // };

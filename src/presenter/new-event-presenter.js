@@ -9,16 +9,21 @@ export default class NewEventPresenter {
   #onDataChange = null;
   #onCloseForm = null;
   #eventEditFormComponent = null;
+  #escKeyListener = null;
 
   constructor({ eventsModel, destinationsModel, offersModel, onDataChange, onCloseForm }) {
     this.#events = eventsModel;
-    this.#destinations = destinationsModel;
-    this.#offers = offersModel;
+    this.#destinations = destinationsModel.destinations;
+    this.#offers = offersModel.offers;
     this.#onDataChange = onDataChange;
     this.#onCloseForm = onCloseForm;
   }
 
   init() {
+    if (this.#eventEditFormComponent) {
+      this.destroy();
+    }
+
     const defaultType = EVENT_TYPES[5];
     const defaultOffers = this.#offers.find((offer) => offer.type === defaultType)?.offers || [];
 
@@ -39,11 +44,12 @@ export default class NewEventPresenter {
     });
 
     render(this.#eventEditFormComponent, document.querySelector('.trip-events__list'), RenderPosition.AFTERBEGIN);
+    this.#addEscKeyListener();
   }
 
   #formSubmitHandler = async (newEvent) => {
     try {
-      const response = await this.#events.addEvent(newEvent);
+      await this.#events.addEvent(newEvent);
 
       this.destroy();
       document.querySelector('.trip-main__event-add-btn').disabled = false;
@@ -55,14 +61,33 @@ export default class NewEventPresenter {
 
   #handleCloseFormClick = () => {
     this.#onCloseForm();
-    remove(this.#eventEditFormComponent);
-    this.#eventEditFormComponent = null;
+    this.destroy();
   };
 
   destroy() {
     if (this.#eventEditFormComponent) {
       remove(this.#eventEditFormComponent);
       this.#eventEditFormComponent = null;
+    }
+
+    this.#removeEscKeyListener();
+  }
+
+  #addEscKeyListener() {
+    this.#escKeyListener = (evt) => {
+      if (evt.key === 'Escape') {
+        evt.preventDefault();
+        this.#handleCloseFormClick(); // Закрываем форму при нажатии Escape
+      }
+    };
+
+    document.addEventListener('keydown', this.#escKeyListener);
+  }
+
+  #removeEscKeyListener() {
+    if (this.#escKeyListener) {
+      document.removeEventListener('keydown', this.#escKeyListener);
+      this.#escKeyListener = null;
     }
   }
 }
