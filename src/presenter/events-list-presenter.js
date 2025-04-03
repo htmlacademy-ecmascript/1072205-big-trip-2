@@ -37,6 +37,10 @@ export default class EventsListPresenter {
   }
 
   #handleNewEventClick = () => {
+    if (this.#newEventPresenter) {
+      return;
+    }
+
     this.#newEventPresenter = new NewEventPresenter({
       eventsModel: this.eventsModel,
       destinationsModel: this.#destinationsModel,

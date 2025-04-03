@@ -10,6 +10,7 @@ export default class NewEventPresenter {
   #onCloseForm = null;
   #eventEditFormComponent = null;
   #escKeyListener = null;
+  #isFormOpen = false;
 
   constructor({ eventsModel, destinationsModel, offersModel, onDataChange, onCloseForm }) {
     this.#events = eventsModel;
@@ -20,9 +21,9 @@ export default class NewEventPresenter {
   }
 
   init() {
-    if (this.#eventEditFormComponent) {
-      this.destroy();
-    }
+    if (this.#isFormOpen) return;
+
+    this.#isFormOpen = true;
 
     const defaultType = EVENT_TYPES[5];
     const defaultOffers = this.#offers.find((offer) => offer.type === defaultType)?.offers || [];
@@ -71,13 +72,14 @@ export default class NewEventPresenter {
     }
 
     this.#removeEscKeyListener();
+    this.#isFormOpen = false;
   }
 
   #addEscKeyListener() {
     this.#escKeyListener = (evt) => {
       if (evt.key === 'Escape') {
         evt.preventDefault();
-        this.#handleCloseFormClick(); // Закрываем форму при нажатии Escape
+        this.#handleCloseFormClick();
       }
     };
 
