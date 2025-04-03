@@ -9,7 +9,7 @@ const Method = {
 
 export default class EventApiService extends ApiService {
   constructor() {
-    super('https://22.objects.htmlacademy.pro/big-trip', 'Basic eo0w590ik29889a'); // замените на свой токен
+    super('https://23.objects.htmlacademy.pro/big-trip', 'Basic eo0w590ik29889a'); // замените на свой токен
   }
 
   async getEvents() {

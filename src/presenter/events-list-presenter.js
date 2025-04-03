@@ -2,8 +2,6 @@ import { FILTERS } from '../const.js';
 import { render } from '../framework/render.js';
 import EventListView from '../view/event-list-view.js';
 import EventPresenter from './event-presenter.js';
-import NewEventPresenter from './new-event-presenter.js';
-import { remove } from '../framework/render.js';
 
 export default class EventsListPresenter {
   #events = [];
@@ -12,58 +10,24 @@ export default class EventsListPresenter {
   #eventPresenters = new Map();
   #eventListComponent = new EventListView();
   #tripEventElement;
-  #filtersElement;
-  #newEventPresenter = null;
   #currentFilterType = FILTERS[0].type;
   #onDataChange = null;
   #resetView = null;
-  #clearExistingForms = null;
 
-  constructor(eventsModel, destinationsModel, offersModel, onDataChange, resetView, clearExistingForms) {
+  constructor(eventsModel, destinationsModel, offersModel, onDataChange, resetView) {
     this.eventsModel = eventsModel;
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
     this.#onDataChange = onDataChange;
     this.#resetView = resetView;
-    this.#clearExistingForms = clearExistingForms;
   }
 
   init(events) {
     this.#events = [...events];
     this.#tripEventElement = document.querySelector('.page-main .trip-events');
-    this.#filtersElement = document.querySelector('.trip-controls__filters');
 
     this.#renderEventList();
-    document
-      .querySelector('.trip-main__event-add-btn')
-      .addEventListener('click', this.#handleNewEventClick);
   }
-
-  #handleNewEventClick = () => {
-    if (this.#newEventPresenter) {
-      return;
-    }
-
-    this.#newEventPresenter = new NewEventPresenter({
-      eventsModel: this.eventsModel,
-      destinationsModel: this.#destinationsModel,
-      offersModel: this.#offersModel,
-      onDataChange: this.#onDataChange,
-      onCloseForm: this.#handleCloseForm,
-    });
-
-    this.#newEventPresenter.init();
-  };
-
-  #handleCloseForm = () => {
-    const existingForms = document.querySelectorAll('.event-edit-form');
-
-    existingForms.forEach((form) => {
-      remove(form);
-      this.#newEventPresenter = null;
-      document.querySelector('.trip-main__event-add-btn').disabled = false;
-    });
-  };
 
   #renderEventList() {
     this.#clearEventList();

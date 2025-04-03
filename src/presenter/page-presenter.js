@@ -1,6 +1,7 @@
 import { render, RenderPosition } from '../framework/render.js';
 import { FILTERS, SORTS } from '../const.js';
 import TripInfoView from '../view/trip-info-view.js';
+import NewEventPresenter from './new-event-presenter.js';
 import NoEventView from '../view/no-event-view.js';
 import EventsListPresenter from './events-list-presenter.js';
 import FiltersView from '../view/filters-view.js';
@@ -15,6 +16,7 @@ export default class PagePresenter {
   #tripMainElement = null;
   #eventListPresenter = null;
   #tripEventElement = null;
+  #newEventPresenter = null;
 
   #currentFilterType = FILTERS[0].type;
   #currentSortType = SORTS[0].type;
@@ -33,12 +35,14 @@ export default class PagePresenter {
   init() {
     this.#updateData();
 
-    if (!this.#isDataLoaded()) {
-      return;
-    }
-
     if (this.#events.length === 0) {
       this.#renderNoEvent();
+    }
+
+    const newEventButton = document.querySelector('.trip-main__event-add-btn');
+    newEventButton.addEventListener('click', this.#handleNewEventClick);
+
+    if (!this.#isDataLoaded()) {
       return;
     }
 
@@ -78,8 +82,58 @@ export default class PagePresenter {
     return this.#events.length > 0 && this.#destinations.length > 0 && this.#offers.length > 0;
   }
 
+  #handleNewEventClick = () => {
+    if (this.#newEventPresenter) {
+      return;
+    }
+
+    let eventListContainer = document.querySelector('.trip-events__list');
+
+    if (!eventListContainer) {
+      eventListContainer = document.createElement('ul');
+      eventListContainer.classList.add('trip-events__list');
+      this.#tripEventElement.appendChild(eventListContainer);
+    }
+
+    this.#removeNoEvent();
+
+    document.querySelector('.trip-main__event-add-btn').disabled = true;
+
+    this.#newEventPresenter = new NewEventPresenter({
+      container: eventListContainer,
+      eventsModel: this.eventsModel,
+      destinationsModel: this.destinationsModel,
+      offersModel: this.offersModel,
+      onDataChange: this.updateEvent,
+      onCloseForm: this.#handleCloseForm,
+    });
+
+    this.#newEventPresenter.init();
+  };
+
+  #handleCloseForm = () => {
+    const existingForms = document.querySelectorAll('.event-edit-form');
+
+    existingForms.forEach((form) => {
+      remove(form);
+      this.#newEventPresenter = null;
+      document.querySelector('.trip-main__event-add-btn').disabled = false;
+    });
+
+    if (this.#events.length === 0) {
+      this.#renderNoEvent();
+    }
+  };
+
   #renderNoEvent() {
     render(new NoEventView(), this.#tripEventElement);
+  }
+
+  #removeNoEvent() {
+    const noEventElement = this.#tripEventElement.querySelector('.trip-events__msg');
+    if (noEventElement) {
+      noEventElement.remove();
+    }
   }
 
   #renderTripInfo() {
@@ -137,13 +191,13 @@ export default class PagePresenter {
   }
 
   #applySort(events, sortType) {
-    if (sortType === 'price') {
-      return [...events].sort((a, b) => b.basePrice - a.basePrice);
+    const sortOption = SORTS.find((sort) => sort.type === sortType);
+
+    if (!sortOption) {
+      return [...events];
     }
-    if (sortType === 'time') {
-      return [...events].sort((a, b) => (b.dateTo - b.dateFrom) - (a.dateTo - a.dateFrom));
-    }
-    return [...events];
+
+    return [...events].sort(sortOption.sort);
   }
 
   #handleSortChange = (sortType) => {
@@ -155,7 +209,7 @@ export default class PagePresenter {
   };
 
   #getFilteredAndSortedEvents() {
-    const filteredEvents = this.#events.filter((event) => this.#applyFilter(event, this.#currentFilterType));
+    const filteredEvents = this.#applyFilter(this.#events, this.#currentFilterType);
     const sortedEvents = this.#applySort(filteredEvents, this.#currentSortType);
     return sortedEvents;
   }
