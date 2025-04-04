@@ -21,7 +21,6 @@ export default class PagePresenter {
   #currentFilterType = FILTERS[0].type;
   #currentSortType = SORTS[0].type;
 
-  // Флаг для отслеживания состояния, нужно ли рендерить фильтры и сортировку
   #isFiltersAndSortRendered = false;
 
   constructor(eventsModel, destinationsModel, offersModel) {
@@ -89,24 +88,19 @@ export default class PagePresenter {
   }
 
   #handleNewEventClick = () => {
-    // Сброс фильтра и сортировки
     this.#currentFilterType = FILTERS[0].type;
     this.#currentSortType = SORTS[0].type;
 
-    // Удалить открытые формы редактирования
     this.#eventPresenters.forEach((presenter) => presenter.destroy());
     this.#eventPresenters.clear();
 
-    // Удалить старые формы создания
     const existingForms = document.querySelectorAll('.event--edit');
     existingForms.forEach((form) => form.remove());
 
-    // Не создавать новую форму, если уже открыта
     if (this.#newEventPresenter) {
       return;
     }
 
-    // Обновление интерфейса
     this.#clearEventList();
     this.#renderFilters();
     this.#renderSort();

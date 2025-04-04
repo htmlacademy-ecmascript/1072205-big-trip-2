@@ -51,11 +51,8 @@ function createEventEditFormTemplate(event, destinations, offersList) {
   const destinationById = destinations.find((dest) => dest.id === destination);
   const offersByType = offersList.find((offer) => offer.type.toLowerCase() === type.toLowerCase())?.offers ?? [];
   const selectedOffers = offersByType.filter((offer) => offers.includes(offer.id));
-  // Проверка наличия картинок и описания
   const hasPictures = destinationById?.pictures?.length > 0;
   const hasDescription = destinationById?.description?.trim() !== '';
-
-  // Проверка, есть ли данные для отображения секции назначения
   const showDestinationSection = hasPictures || hasDescription;
 
   return (
