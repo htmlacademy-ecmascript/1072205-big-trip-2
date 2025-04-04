@@ -183,7 +183,7 @@ export default class EventEditFormView extends AbstractStatefulView {
     evt.preventDefault();
     const saveButton = this.element.querySelector('.event__save-btn');
     const resetButton = this.element.querySelector('.event__reset-btn');
-    evt.target.blur();
+    //evt.target.blur();
     saveButton.textContent = 'Saving...';
     saveButton.disabled = true;
     resetButton.disabled = true;
@@ -223,7 +223,7 @@ export default class EventEditFormView extends AbstractStatefulView {
 
   #deleteClickHandler = async (evt) => {
     evt.preventDefault();
-    evt.target.blur();
+    //evt.target.blur();
     const resetButton = this.element.querySelector('.event__reset-btn');
     const saveButton = this.element.querySelector('.event__save-btn');
 
