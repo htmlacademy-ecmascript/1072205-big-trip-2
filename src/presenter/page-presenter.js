@@ -6,6 +6,7 @@ import NoEventView from '../view/no-event-view.js';
 import EventsListPresenter from './events-list-presenter.js';
 import FiltersView from '../view/filters-view.js';
 import SortView from '../view/sort-view.js';
+import UserMessageView from '../view/user-message-view.js';
 
 export default class PagePresenter {
   #events = [];
@@ -13,6 +14,7 @@ export default class PagePresenter {
   #offers = [];
   #eventPresenters = new Map();
   #tripInfoComponent = null;
+  #userMessageComponent = null;
   #tripMainElement = null;
   #eventListPresenter = null;
   #tripEventElement = null;
@@ -101,7 +103,7 @@ export default class PagePresenter {
       return;
     }
 
-    this.#clearEventList();
+    //this.#clearEventList();
     this.#renderFilters();
     this.#renderSort();
     this.#isFiltersAndSortRendered = true;
@@ -244,6 +246,22 @@ export default class PagePresenter {
   }
 
   #renderEventList() {
+    this.#clearEventList();
+    this.#removeUserMessage();
+
+    const filteredAndSortedEvents = this.#getFilteredAndSortedEvents();
+
+    if (filteredAndSortedEvents.length === 0) {
+      const emptyListContainer = document.createElement('ul');
+      emptyListContainer.classList.add('trip-events__list');
+      this.#tripEventElement.appendChild(emptyListContainer);
+
+      this.#userMessageComponent = new UserMessageView(this.#currentFilterType);
+      render(this.#userMessageComponent, emptyListContainer);
+      return;
+    }
+
+
     this.#eventListPresenter = new EventsListPresenter(
       this.eventsModel,
       this.destinationsModel,
@@ -251,16 +269,28 @@ export default class PagePresenter {
       this.#handleViewAction,
     );
 
-    const filteredAndSortedEvents = this.#getFilteredAndSortedEvents();
     this.#eventListPresenter.init(filteredAndSortedEvents);
-
     this.#renderSort();
+  }
+
+
+  #removeUserMessage() {
+    if (this.#userMessageComponent) {
+      this.#userMessageComponent.element.remove();
+      this.#userMessageComponent = null;
+    }
   }
 
   #clearEventList() {
     this.#eventPresenters.forEach((presenter) => presenter.destroy());
     this.#eventPresenters.clear();
+
+    const eventListContainer = this.#tripEventElement.querySelector('.trip-events__list');
+    if (eventListContainer) {
+      eventListContainer.remove();
+    }
   }
+
 
   #handleViewAction = (update) => {
     this.updateEvent(update);
