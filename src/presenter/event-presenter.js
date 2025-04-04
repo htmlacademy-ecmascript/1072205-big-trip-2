@@ -138,6 +138,7 @@ export default class EventPresenter {
       this.destroy();
     } catch (error) {
       this.#eventEditFormComponent.unlockForm();
+      throw error;
     }
   };
 

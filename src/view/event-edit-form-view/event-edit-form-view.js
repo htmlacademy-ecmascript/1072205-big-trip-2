@@ -161,18 +161,17 @@ export default class EventEditFormView extends AbstractStatefulView {
     });
   };
 
-  unlockForm = () => {
+  unlockForm() {
     const saveButton = this.element.querySelector('.event__save-btn');
-    const deleteButton = this.element.querySelector('.event__reset-btn');
-    if (saveButton) {
-      saveButton.textContent = 'Save';
-    }
-    if (deleteButton) {
-      deleteButton.textContent = 'Delete';
-    }
-    deleteButton.disabled = false;
+    const resetButton = this.element.querySelector('.event__reset-btn');
     saveButton.disabled = false;
-  };
+    resetButton.disabled = false;
+    const formElements = this.element.querySelectorAll('input, select, textarea, button, .event__offer-checkbox');
+    formElements.forEach((element) => {
+      element.disabled = false;
+    });
+    this.element.querySelector('.event--edit').classList.remove('loading'); // удаляем класс после завершения
+  }
 
   #shakeForm() {
     const formElement = this.element.querySelector('.event--edit');
@@ -184,9 +183,14 @@ export default class EventEditFormView extends AbstractStatefulView {
     evt.preventDefault();
     const saveButton = this.element.querySelector('.event__save-btn');
     const resetButton = this.element.querySelector('.event__reset-btn');
+    evt.target.blur();
     saveButton.textContent = 'Saving...';
     saveButton.disabled = true;
     resetButton.disabled = true;
+    const formElements = this.element.querySelectorAll('input, select, textarea, button, .event__offer-checkbox');
+    formElements.forEach((element) => {
+      element.disabled = true;
+    })
 
     const selectedOffers = this._state.offers;
     const updatedEvent = {
@@ -219,17 +223,26 @@ export default class EventEditFormView extends AbstractStatefulView {
 
   #deleteClickHandler = async (evt) => {
     evt.preventDefault();
+    evt.target.blur();
     const resetButton = this.element.querySelector('.event__reset-btn');
     const saveButton = this.element.querySelector('.event__save-btn');
+
     if (resetButton.innerHTML === 'Delete') {
       resetButton.textContent = 'Deleting...';
       resetButton.disabled = true;
       saveButton.disabled = true;
+      const formElements = this.element.querySelectorAll('input, select, textarea, button, .event__offer-checkbox');
+      formElements.forEach((element) => {
+        element.disabled = true;
+      })
     }
+
     try {
       await this.#handleDeleteClick(this._state.id);
       this.unlockForm();
     } catch (error) {
+      console.log('ОШибка удаления');
+      this.#shakeForm(); //
       this.unlockForm();
     }
   };
