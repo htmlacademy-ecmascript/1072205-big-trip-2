@@ -51,6 +51,12 @@ function createEventEditFormTemplate(event, destinations, offersList) {
   const destinationById = destinations.find((dest) => dest.id === destination);
   const offersByType = offersList.find((offer) => offer.type.toLowerCase() === type.toLowerCase())?.offers ?? [];
   const selectedOffers = offersByType.filter((offer) => offers.includes(offer.id));
+  // Проверка наличия картинок и описания
+  const hasPictures = destinationById?.pictures?.length > 0;
+  const hasDescription = destinationById?.description?.trim() !== '';
+
+  // Проверка, есть ли данные для отображения секции назначения
+  const showDestinationSection = hasPictures || hasDescription;
 
   return (
     `<li class="trip-events__item">
@@ -148,21 +154,23 @@ function createEventEditFormTemplate(event, destinations, offersList) {
           </button>
         </header>
         <section class="event__details">
-          ${createOffersContainerTemplate(offersByType, selectedOffers)}
+        ${createOffersContainerTemplate(offersByType, selectedOffers)}
 
-          ${destination ? `
-          <section class="event__section  event__section--destination">
-            <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-            <p class="event__destination-description">${destination ? destinationById.description : ''}</p>
+        ${destination && showDestinationSection ? `
+        <section class="event__section  event__section--destination">
+          <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+          ${hasDescription ? `<p class="event__destination-description">${destinationById.description}</p>` : ''}
 
+          ${hasPictures ? `
             <div class="event__photos-container">
               <div class="event__photos-tape">
-                ${destination ? createDestinationPhotoTemplate(destinationById) : ''}
+                ${createDestinationPhotoTemplate(destinationById)}
               </div>
             </div>
-          </section>
-        ` : ''}
+          ` : ''}
         </section>
+      ` : ''}
+      </section>
       </form>
     </li>`
   );
