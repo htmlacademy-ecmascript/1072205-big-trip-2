@@ -49,7 +49,7 @@ export default class TripInfoView extends AbstractView {
   #destinations;
   #offers;
 
-  constructor({ events, destinations, offers }) {
+  constructor(events, destinations, offers) {
     super();
     this.#events = events;
     this.#destinations = destinations;

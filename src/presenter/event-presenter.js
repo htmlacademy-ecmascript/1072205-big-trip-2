@@ -19,11 +19,12 @@ export default class EventPresenter {
   static #currentlyEditing = null;
   #eventsModel = null;
 
-  constructor(container, renderEventList, eventsModel, handleViewAction) {
+  constructor(container, renderEventList, eventsModel, onDataChange, onResetView) {
     this.#tripEventsListElement = container;
     this.renderEventList = renderEventList;
     this.#eventsModel = eventsModel;
-    this.#handleViewAction = handleViewAction;
+    this.#onDataChange = onDataChange;
+    this.#onResetView = onResetView;
   }
 
   init(event, eventsModel, destinationsModel, offersModel, onDataChange, onResetView) {
@@ -33,8 +34,8 @@ export default class EventPresenter {
 
     this.#event = event;
     this.#events = eventsModel;
-    this.#destinations = destinationsModel;
-    this.#offers = offersModel;
+    this.#destinations = destinationsModel.destinations;
+    this.#offers = offersModel.offers;
     this.#onDataChange = onDataChange;
     this.#onResetView = onResetView;
     const prevEventComponent = this.#eventComponent;
@@ -86,6 +87,10 @@ export default class EventPresenter {
   }
 
   #handleFavoriteClick = () => {
+    if (!this.#onDataChange) {
+      return;
+    }
+
     const updatedEvent = {
       ...this.#event,
       isFavorite: !this.#event.isFavorite,
@@ -96,10 +101,16 @@ export default class EventPresenter {
 
     const updatedEventFromServer = this.#eventsModel.updateEvent(updatedEvent);
     this.#eventComponent.updateFavoriteButton(updatedEventFromServer.isFavorite);
+
     this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, updatedEventFromServer);
   };
 
   #handleEditClick = () => {
+    const existingForms = document.querySelectorAll('.event--edit');
+    const addNewEventButton = document.querySelector('.trip-main__event-add-btn');
+    addNewEventButton.disabled = false;
+    existingForms.forEach((form) => form.remove());
+
     if (EventPresenter.#currentlyEditing) {
       EventPresenter.#currentlyEditing.#replaceFormToItem();
     }
