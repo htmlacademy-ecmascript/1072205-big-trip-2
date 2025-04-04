@@ -330,25 +330,71 @@ export default class PagePresenter {
     return this.#events.length > 0 && this.#destinations.length > 0 && this.#offers.length > 0;
   }
 
+  // #handleNewEventClick = () => {
+  //   // Сброс фильтра и сортировки
+  //   this.#currentFilterType = FILTERS[0].type;
+  //   this.#currentSortType = SORTS[0].type;
+
+  //   const existingForms = document.querySelectorAll('.event--edit');
+  //   existingForms.forEach((form) => form.remove());
+
+  //   if (this.#newEventPresenter) {
+  //     return;
+  //   }
+
+  //   // Удаляем старые элементы и отрисовываем новые
+  //   this.#clearEventList();
+  //   this.#renderFilters();
+  //   this.#renderSort();
+  //   this.#isFiltersAndSortRendered = true;
+
+  //   let eventListContainer = document.querySelector('.trip-events__list');
+  //   if (!eventListContainer) {
+  //     eventListContainer = document.createElement('ul');
+  //     eventListContainer.classList.add('trip-events__list');
+  //     this.#tripEventElement.appendChild(eventListContainer);
+  //   }
+
+  //   this.#removeNoEvent();
+  //   document.querySelector('.trip-main__event-add-btn').disabled = true;
+
+  //   this.#newEventPresenter = new NewEventPresenter({
+  //     container: eventListContainer,
+  //     eventsModel: this.eventsModel,
+  //     destinationsModel: this.destinationsModel,
+  //     offersModel: this.offersModel,
+  //     onDataChange: this.updateEvent,
+  //     onCloseForm: this.#handleCloseForm,
+  //   });
+
+  //   this.#newEventPresenter.init();
+  // };
+
   #handleNewEventClick = () => {
-    // Сбросить фильтры и сортировку
+    // Сброс фильтра и сортировки
     this.#currentFilterType = FILTERS[0].type;
     this.#currentSortType = SORTS[0].type;
 
-    // Сбросить интерфейс фильтров и сортировки
-    this.#isFiltersAndSortRendered = false;
-    this.#renderFilters();
-    this.#renderSort();
+    // Удалить открытые формы редактирования
+    this.#eventPresenters.forEach((presenter) => presenter.destroy());
+    this.#eventPresenters.clear();
 
+    // Удалить старые формы создания
     const existingForms = document.querySelectorAll('.event--edit');
     existingForms.forEach((form) => form.remove());
 
+    // Не создавать новую форму, если уже открыта
     if (this.#newEventPresenter) {
       return;
     }
 
-    let eventListContainer = document.querySelector('.trip-events__list');
+    // Обновление интерфейса
+    this.#clearEventList();
+    this.#renderFilters();
+    this.#renderSort();
+    this.#isFiltersAndSortRendered = true;
 
+    let eventListContainer = document.querySelector('.trip-events__list');
     if (!eventListContainer) {
       eventListContainer = document.createElement('ul');
       eventListContainer.classList.add('trip-events__list');
@@ -356,7 +402,6 @@ export default class PagePresenter {
     }
 
     this.#removeNoEvent();
-
     document.querySelector('.trip-main__event-add-btn').disabled = true;
 
     this.#newEventPresenter = new NewEventPresenter({
@@ -371,14 +416,19 @@ export default class PagePresenter {
     this.#newEventPresenter.init();
   };
 
+
+
   #handleCloseForm = () => {
     const existingForms = document.querySelectorAll('.event-edit-form');
+    existingForms.forEach((form) => form.remove());
 
-    existingForms.forEach((form) => {
-      form.remove();
-      this.#newEventPresenter = null;
-      document.querySelector('.trip-main__event-add-btn').disabled = false;
-    });
+    this.#newEventPresenter = null;
+
+    // Активируем кнопку после закрытия формы
+    const newEventButton = document.querySelector('.trip-main__event-add-btn');
+    if (newEventButton) {
+      newEventButton.disabled = false;
+    }
 
     if (this.#events.length === 0) {
       this.#renderNoEvent();
@@ -407,6 +457,9 @@ export default class PagePresenter {
   }
 
   #renderFilters() {
+    const filtersContainer = document.querySelector('.trip-controls__filters');
+    filtersContainer.innerHTML = ''; // Удаляем старые фильтры
+
     const filters = FILTERS.map((filter) => ({
       ...filter,
       isDisabled: this.#applyFilter(this.#events, filter.type).length === 0,
@@ -416,7 +469,7 @@ export default class PagePresenter {
       filters,
       currentFilterType: this.#currentFilterType,
       onFilterChange: this.#handleFilterChange,
-    }), document.querySelector('.trip-controls__filters'));
+    }), filtersContainer);
   }
 
   #applyFilter(events, filterType) {
@@ -443,6 +496,11 @@ export default class PagePresenter {
   };
 
   #renderSort() {
+    const oldSort = this.#tripEventElement.querySelector('.trip-sort');
+    if (oldSort) {
+      oldSort.remove(); // Удаляем старую сортировку
+    }
+
     render(new SortView({
       sorts: SORTS,
       currentSortType: this.#currentSortType,
@@ -484,6 +542,8 @@ export default class PagePresenter {
 
     const filteredAndSortedEvents = this.#getFilteredAndSortedEvents();
     this.#eventListPresenter.init(filteredAndSortedEvents);
+
+    this.#renderSort(); // Переносим вызов сортировки сюда, чтобы всегда была видна
   }
 
   #clearEventList() {

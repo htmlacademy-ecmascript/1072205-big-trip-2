@@ -55,7 +55,11 @@ export default class NewEventPresenter {
       await this.#events.addEvent(newEvent);
 
       this.destroy();
-      document.querySelector('.trip-main__event-add-btn').disabled = false;
+
+      const newEventButton = document.querySelector('.trip-main__event-add-btn');
+      if (newEventButton) {
+        newEventButton.disabled = false;
+      }
     } catch (error) {
       this.#eventEditFormComponent.unlockForm();
       this.#eventEditFormComponent.shakeForm();
@@ -75,6 +79,11 @@ export default class NewEventPresenter {
 
     this.#removeEscKeyListener();
     this.#isFormOpen = false;
+
+    const newEventButton = document.querySelector('.trip-main__event-add-btn');
+    if (newEventButton) {
+      newEventButton.disabled = false;
+    }
   }
 
   #addEscKeyListener() {
