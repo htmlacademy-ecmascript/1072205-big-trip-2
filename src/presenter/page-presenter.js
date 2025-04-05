@@ -143,8 +143,15 @@ export default class PagePresenter {
 
     if (this.#events.length === 0) {
       this.#renderNoEvent();
+    } else {
+      this.#clearEventList();     
+      this.#renderTripInfo();
+      this.#renderFilters();
+      this.#renderSort();
+      this.#renderEventList();
     }
   };
+
 
   #renderNoEvent() {
     render(new NoEventView(this.#currentFilterType), this.#tripEventElement);
