@@ -6,6 +6,7 @@ import NoEventView from '../view/no-event-view.js';
 import EventsListPresenter from './events-list-presenter.js';
 import FiltersView from '../view/filters-view.js';
 import SortView from '../view/sort-view.js';
+import UserMessageView from '../view/user-message-view.js';
 
 export default class PagePresenter {
   #events = [];
@@ -13,6 +14,7 @@ export default class PagePresenter {
   #offers = [];
   #eventPresenters = new Map();
   #tripInfoComponent = null;
+  #userMessageComponent = null;
   #tripMainElement = null;
   #eventListPresenter = null;
   #tripEventElement = null;
@@ -20,6 +22,8 @@ export default class PagePresenter {
 
   #currentFilterType = FILTERS[0].type;
   #currentSortType = SORTS[0].type;
+
+  #isFiltersAndSortRendered = false;
 
   constructor(eventsModel, destinationsModel, offersModel) {
     this.eventsModel = eventsModel;
@@ -47,9 +51,12 @@ export default class PagePresenter {
     }
 
     this.#renderTripInfo();
-    this.#renderFilters();
+    if (!this.#isFiltersAndSortRendered) {
+      this.#renderFilters();
+      this.#renderSort();
+      this.#isFiltersAndSortRendered = true;
+    }
     this.#renderEventList();
-    this.#renderSort();
   }
 
   updateEvent(updatedEvent) {
@@ -83,6 +90,12 @@ export default class PagePresenter {
   }
 
   #handleNewEventClick = () => {
+    this.#currentFilterType = FILTERS[0].type;
+    this.#currentSortType = SORTS[0].type;
+
+    this.#eventPresenters.forEach((presenter) => presenter.destroy());
+    this.#eventPresenters.clear();
+
     const existingForms = document.querySelectorAll('.event--edit');
     existingForms.forEach((form) => form.remove());
 
@@ -90,8 +103,12 @@ export default class PagePresenter {
       return;
     }
 
-    let eventListContainer = document.querySelector('.trip-events__list');
+    //this.#clearEventList();
+    this.#renderFilters();
+    this.#renderSort();
+    this.#isFiltersAndSortRendered = true;
 
+    let eventListContainer = document.querySelector('.trip-events__list');
     if (!eventListContainer) {
       eventListContainer = document.createElement('ul');
       eventListContainer.classList.add('trip-events__list');
@@ -99,7 +116,6 @@ export default class PagePresenter {
     }
 
     this.#removeNoEvent();
-
     document.querySelector('.trip-main__event-add-btn').disabled = true;
 
     this.#newEventPresenter = new NewEventPresenter({
@@ -116,20 +132,29 @@ export default class PagePresenter {
 
   #handleCloseForm = () => {
     const existingForms = document.querySelectorAll('.event-edit-form');
+    existingForms.forEach((form) => form.remove());
 
-    existingForms.forEach((form) => {
-      remove(form);
-      this.#newEventPresenter = null;
-      document.querySelector('.trip-main__event-add-btn').disabled = false;
-    });
+    this.#newEventPresenter = null;
+
+    const newEventButton = document.querySelector('.trip-main__event-add-btn');
+    if (newEventButton) {
+      newEventButton.disabled = false;
+    }
 
     if (this.#events.length === 0) {
       this.#renderNoEvent();
+    } else {
+      this.#clearEventList();     
+      this.#renderTripInfo();
+      this.#renderFilters();
+      this.#renderSort();
+      this.#renderEventList();
     }
   };
 
+
   #renderNoEvent() {
-    render(new NoEventView(), this.#tripEventElement);
+    render(new NoEventView(this.#currentFilterType), this.#tripEventElement);
   }
 
   #removeNoEvent() {
@@ -150,6 +175,9 @@ export default class PagePresenter {
   }
 
   #renderFilters() {
+    const filtersContainer = document.querySelector('.trip-controls__filters');
+    filtersContainer.innerHTML = '';
+
     const filters = FILTERS.map((filter) => ({
       ...filter,
       isDisabled: this.#applyFilter(this.#events, filter.type).length === 0,
@@ -159,7 +187,7 @@ export default class PagePresenter {
       filters,
       currentFilterType: this.#currentFilterType,
       onFilterChange: this.#handleFilterChange,
-    }), document.querySelector('.trip-controls__filters'));
+    }), filtersContainer);
   }
 
   #applyFilter(events, filterType) {
@@ -182,11 +210,17 @@ export default class PagePresenter {
     this.#currentSortType = SORTS[0].type;
     this.#updateData();
     this.#clearEventList();
-    this.#renderEventList();
+    this.#renderFilters();
     this.#renderSort();
+    this.#renderEventList();
   };
 
   #renderSort() {
+    const oldSort = this.#tripEventElement.querySelector('.trip-sort');
+    if (oldSort) {
+      oldSort.remove();
+    }
+
     render(new SortView({
       sorts: SORTS,
       currentSortType: this.#currentSortType,
@@ -219,6 +253,22 @@ export default class PagePresenter {
   }
 
   #renderEventList() {
+    this.#clearEventList();
+    this.#removeUserMessage();
+
+    const filteredAndSortedEvents = this.#getFilteredAndSortedEvents();
+
+    if (filteredAndSortedEvents.length === 0) {
+      const emptyListContainer = document.createElement('ul');
+      emptyListContainer.classList.add('trip-events__list');
+      this.#tripEventElement.appendChild(emptyListContainer);
+
+      this.#userMessageComponent = new UserMessageView(this.#currentFilterType);
+      render(this.#userMessageComponent, emptyListContainer);
+      return;
+    }
+
+
     this.#eventListPresenter = new EventsListPresenter(
       this.eventsModel,
       this.destinationsModel,
@@ -226,14 +276,28 @@ export default class PagePresenter {
       this.#handleViewAction,
     );
 
-    const filteredAndSortedEvents = this.#getFilteredAndSortedEvents();
     this.#eventListPresenter.init(filteredAndSortedEvents);
+    this.#renderSort();
+  }
+
+
+  #removeUserMessage() {
+    if (this.#userMessageComponent) {
+      this.#userMessageComponent.element.remove();
+      this.#userMessageComponent = null;
+    }
   }
 
   #clearEventList() {
     this.#eventPresenters.forEach((presenter) => presenter.destroy());
     this.#eventPresenters.clear();
+
+    const eventListContainer = this.#tripEventElement.querySelector('.trip-events__list');
+    if (eventListContainer) {
+      eventListContainer.remove();
+    }
   }
+
 
   #handleViewAction = (update) => {
     this.updateEvent(update);

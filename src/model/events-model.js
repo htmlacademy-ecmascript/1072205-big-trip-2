@@ -12,6 +12,7 @@ export default class EventsModel extends Observable {
       this._notify(UpdateType.INIT);
     } catch (error) {
       this.#events = [];
+      throw new Error('Ошибка загрузки точек марщрута');
     }
   }
 
@@ -29,7 +30,8 @@ export default class EventsModel extends Observable {
       }
       return updatedEvent;
     } catch (err) {
-      //console.error('Ошибка при обновлении события:', err);
+      //throw new Error('Ошибка обновления точки маршрута');
+      return;
     }
   }
 
@@ -39,7 +41,7 @@ export default class EventsModel extends Observable {
       this.#events = [addedEvent, ...this.#events];
       this._notify(UpdateType.POST, addedEvent);
     } catch (err) {
-      //console.error('Ошибка при добавлении события:', err);
+      throw new Error('Ошибка добавления новой точки маршрута');
     }
   }
 
@@ -49,7 +51,7 @@ export default class EventsModel extends Observable {
       this.#events = this.#events.filter((event) => event.id !== eventId);
       this._notify(UpdateType.PATCH, eventId);
     } catch (err) {
-      //console.error('Ошибка при удалении события:', err);
+      throw new Error('Ошибка удаления точки маршрута');
     }
   }
 }

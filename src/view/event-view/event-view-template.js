@@ -17,7 +17,7 @@ function createEventTemplate(event, destinations, offersList) {
   const date = humanizeDate(dateFrom, EVENT_DATE_FORMAT).date;
   const startTime = humanizeDate(dateFrom).time;
   const endTime = humanizeDate(dateTo).time;
-  const duration = Object.entries(eventDuration(dateFrom, dateTo)).map((item) => item[1]).join('\n');
+  const duration = Object.entries(eventDuration(dateFrom, dateTo)).map((item) => item[1]).join(' ');
   const destinationById = destinations.find((dest) => dest.id === destination).name;
   const offersByType = offersList.find((offer) => offer.type.toLowerCase() === type.toLowerCase())?.offers ?? [];
   const selectedOffers = offersByType.filter((offer) => offers.includes(offer.id));
