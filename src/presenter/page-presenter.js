@@ -72,7 +72,6 @@ export default class PagePresenter {
 
   #renderLoading() {
     this.#loadingComponent = new UserMessageView('loading');
-    console.log(this.#loadingComponent);
     render(this.#loadingComponent, this.#tripEventElement, RenderPosition.AFTERBEGIN);
   }
 

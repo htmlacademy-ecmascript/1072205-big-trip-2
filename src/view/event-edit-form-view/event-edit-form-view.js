@@ -146,7 +146,7 @@ export default class EventEditFormView extends AbstractStatefulView {
   };
 
   #priceChangeHandler = (evt) => {
-    evt.target.value = evt.target.value.replace(/\D/g, ''); // Удаляем все нечисловые символы
+    evt.target.value = evt.target.value.replace(/\D/g, '');
     this._setState({ basePrice: Number(evt.target.value) || 0 });
   };
 
@@ -170,7 +170,7 @@ export default class EventEditFormView extends AbstractStatefulView {
     formElements.forEach((element) => {
       element.disabled = false;
     });
-    this.element.querySelector('.event--edit').classList.remove('loading'); // удаляем класс после завершения
+    this.element.querySelector('.event--edit').classList.remove('loading');
   }
 
   #shakeForm() {
@@ -183,7 +183,6 @@ export default class EventEditFormView extends AbstractStatefulView {
     evt.preventDefault();
     const saveButton = this.element.querySelector('.event__save-btn');
     const resetButton = this.element.querySelector('.event__reset-btn');
-    //evt.target.blur();
     saveButton.textContent = 'Saving...';
     saveButton.disabled = true;
     resetButton.disabled = true;
@@ -195,7 +194,7 @@ export default class EventEditFormView extends AbstractStatefulView {
     const selectedOffers = this._state.offers;
     const updatedEvent = {
       ...EventEditFormView.parseStateToEvent(this._state, this.#offers || []),
-      ...(this._state.id && { id: this._state.id }), // Добавляем id только если оно есть
+      ...(this._state.id && { id: this._state.id }),
       offers: selectedOffers,
     };
     if (updatedEvent.id === undefined) {
@@ -223,7 +222,6 @@ export default class EventEditFormView extends AbstractStatefulView {
 
   #deleteClickHandler = async (evt) => {
     evt.preventDefault();
-    //evt.target.blur();
     const resetButton = this.element.querySelector('.event__reset-btn');
     const saveButton = this.element.querySelector('.event__save-btn');
 
@@ -241,7 +239,7 @@ export default class EventEditFormView extends AbstractStatefulView {
       await this.#handleDeleteClick(this._state.id);
       this.unlockForm();
     } catch (error) {
-      this.#shakeForm(); //
+      this.#shakeForm();
       this.unlockForm();
     }
   };

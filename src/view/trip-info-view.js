@@ -8,10 +8,9 @@ function createTripInfoTemplate(events, destinations, offersByType) {
     return '';
   }
 
-  // Получаем уникальные названия городов в порядке их появления
   const destinationNames = events
     .map((event) => destinations.find((dest) => dest.id === event.destination)?.name)
-    .filter((name, index, self) => name && self.indexOf(name) === index); // удаляем дубликаты
+    .filter((name, index, self) => name && self.indexOf(name) === index);
 
   const tripInfoTitle =
     destinationNames.length > 3
@@ -50,8 +49,6 @@ function createTripInfoTemplate(events, destinations, offersByType) {
     </section>`
   );
 }
-
-
 
 export default class TripInfoView extends AbstractView {
   #events;
