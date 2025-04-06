@@ -38,10 +38,10 @@ export default class PagePresenter {
     this.eventsModel.addObserver(this.#handleModelUpdate);
   }
 
-   init() {
-     this.#renderLoading();
+  init() {
+    this.#renderLoading();
 
-     this.#updateData();
+    this.#updateData();
 
     this.#isLoading = false;
 
@@ -127,7 +127,6 @@ export default class PagePresenter {
       return;
     }
 
-    //this.#clearEventList();
     this.#renderFilters();
     this.#renderSort();
     this.#isFiltersAndSortRendered = true;
@@ -202,15 +201,11 @@ export default class PagePresenter {
     const filtersContainer = document.querySelector('.trip-controls__filters');
     filtersContainer.innerHTML = '';
 
-    const filters = FILTERS.map((filter) => ({
-      ...filter,
-      isDisabled: this.#applyFilter(this.#events, filter.type).length === 0,
-    }));
-
     render(new FiltersView({
-      filters,
+      filters: FILTERS,
       currentFilterType: this.#currentFilterType,
       onFilterChange: this.#handleFilterChange,
+      events: this.#events,
     }), filtersContainer);
   }
 
