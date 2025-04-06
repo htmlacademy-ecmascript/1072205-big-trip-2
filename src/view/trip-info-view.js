@@ -3,15 +3,18 @@ import { humanizeDate } from '../utils/event';
 
 const EVENT_DATE_FORMAT = 'DD MMM';
 
-function createTripInfoTemplate(events, destinations) {
+function createTripInfoTemplate(events, destinations, offersByType) {
   if (!events.length) {
     return '';
   }
 
-  const destinationNames = events.map((event) => destinations.find((dest) => dest.id === event.destination).name);
+  const destinationNames = events
+    .map((event) => destinations.find((dest) => dest.id === event.destination)?.name)
+    .filter((name, index, self) => name && self.indexOf(name) === index);
+
   const tripInfoTitle =
     destinationNames.length > 3
-      ? `${destinationNames[0]} &mdash; ... &mdash; ${destinationNames[destinationNames.length - 1]}`
+      ? `${destinationNames[0]} &mdash;...&mdash; ${destinationNames[destinationNames.length - 1]}`
       : destinationNames.join(' &mdash; ');
 
   const tripStartTime = Math.min(...events.map((event) => event.dateFrom));
@@ -20,11 +23,14 @@ function createTripInfoTemplate(events, destinations) {
   const totalCost = events.reduce((sum, event) => {
     let eventCost = event.basePrice;
 
-    if (Array.isArray(event.offers) && event.offers.length > 0) {
-      const selectedOffersCost = event.offers.reduce((offerSum, offer) => offer.isChecked ? offerSum + offer.price : offerSum, 0);
-      eventCost += selectedOffersCost;
-    }
+    const availableOffers = offersByType.find((offerGroup) => offerGroup.type === event.type)?.offers || [];
 
+    const selectedOffersCost = event.offers.reduce((offerSum, offerId) => {
+      const offer = availableOffers.find((item) => item.id === offerId);
+      return offer ? offerSum + offer.price : offerSum;
+    }, 0);
+
+    eventCost += selectedOffersCost;
     return sum + eventCost;
   }, 0);
 

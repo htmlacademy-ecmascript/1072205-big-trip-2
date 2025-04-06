@@ -54,7 +54,7 @@ export default class NewEventPresenter {
     try {
       await this.#events.addEvent(newEvent);
 
-      this.#onCloseForm(); // <--- Важно!
+      this.#onCloseForm();
       this.destroy();
     } catch (error) {
       this.#eventEditFormComponent.unlockForm();
