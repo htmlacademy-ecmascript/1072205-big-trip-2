@@ -66,7 +66,9 @@ export default class SortView extends AbstractView {
     this.#currentSortType = currentSortType;
 
     const parent = this.element.parentElement;
-    if (!parent) return;
+    if (!parent) {
+      return;
+    }
 
     const newSortView = new SortView({
       sorts: this.#sorts,

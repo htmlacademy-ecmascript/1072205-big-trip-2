@@ -144,7 +144,7 @@ export default class PagePresenter {
     if (this.#events.length === 0) {
       this.#renderNoEvent();
     } else {
-      this.#clearEventList();     
+      this.#clearEventList();
       this.#renderTripInfo();
       this.#renderFilters();
       this.#renderSort();
@@ -196,13 +196,13 @@ export default class PagePresenter {
     }
 
     const now = new Date();
-    return events.filter((event) => {
-      return {
+    return events.filter((event) => (
+      {
         future: event.dateFrom > now,
         present: event.dateFrom <= now && event.dateTo >= now,
         past: event.dateTo < now,
-      }[filterType] ?? true;
-    });
+      }[filterType] ?? true
+    ));
   }
 
   #handleFilterChange = (filterType) => {
