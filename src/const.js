@@ -1,6 +1,7 @@
 const EVENT_TYPES = ['Taxi', 'Bus', 'Train', 'Ship', 'Drive', 'Flight', 'Check-in', 'Sightseeing', 'Restaurant'];
 
 const NoEventMessages = {
+  loading: 'Loading...',
   everything: 'Click New Event to create your first point',
   past: 'There are no past events now',
   present: 'There are no present events now',

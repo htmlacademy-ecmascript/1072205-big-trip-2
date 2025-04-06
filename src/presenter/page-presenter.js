@@ -24,6 +24,8 @@ export default class PagePresenter {
   #currentSortType = SORTS[0].type;
 
   #isFiltersAndSortRendered = false;
+  #isLoading = true;
+  #loadingComponent = null;
 
   constructor(eventsModel, destinationsModel, offersModel) {
     this.eventsModel = eventsModel;
@@ -36,8 +38,14 @@ export default class PagePresenter {
     this.eventsModel.addObserver(this.#handleModelUpdate);
   }
 
-  init() {
-    this.#updateData();
+   init() {
+     this.#renderLoading();
+
+     this.#updateData();
+
+    this.#isLoading = false;
+
+    this.#clearLoading();
 
     if (this.#events.length === 0) {
       this.#renderNoEvent();
@@ -51,12 +59,28 @@ export default class PagePresenter {
     }
 
     this.#renderTripInfo();
+
     if (!this.#isFiltersAndSortRendered) {
       this.#renderFilters();
       this.#renderSort();
       this.#isFiltersAndSortRendered = true;
     }
+
     this.#renderEventList();
+  }
+
+
+  #renderLoading() {
+    this.#loadingComponent = new UserMessageView('loading');
+    console.log(this.#loadingComponent);
+    render(this.#loadingComponent, this.#tripEventElement, RenderPosition.AFTERBEGIN);
+  }
+
+  #clearLoading() {
+    if (this.#loadingComponent) {
+      this.#loadingComponent.element.remove();
+      this.#loadingComponent = null;
+    }
   }
 
   updateEvent(updatedEvent) {
