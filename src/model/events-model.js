@@ -30,7 +30,7 @@ export default class EventsModel extends Observable {
       }
       return updatedEvent;
     } catch (err) {
-      //throw new Error('Ошибка обновления точки маршрута');
+      throw new Error('Ошибка обновления точки маршрута');
     }
   }
 
