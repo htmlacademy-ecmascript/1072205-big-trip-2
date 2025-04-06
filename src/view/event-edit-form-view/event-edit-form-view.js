@@ -190,7 +190,7 @@ export default class EventEditFormView extends AbstractStatefulView {
     const formElements = this.element.querySelectorAll('input, select, textarea, button, .event__offer-checkbox');
     formElements.forEach((element) => {
       element.disabled = true;
-    })
+    });
 
     const selectedOffers = this._state.offers;
     const updatedEvent = {
@@ -234,14 +234,13 @@ export default class EventEditFormView extends AbstractStatefulView {
       const formElements = this.element.querySelectorAll('input, select, textarea, button, .event__offer-checkbox');
       formElements.forEach((element) => {
         element.disabled = true;
-      })
+      });
     }
 
     try {
       await this.#handleDeleteClick(this._state.id);
       this.unlockForm();
     } catch (error) {
-      console.log('ОШибка удаления');
       this.#shakeForm(); //
       this.unlockForm();
     }
@@ -266,8 +265,8 @@ export default class EventEditFormView extends AbstractStatefulView {
       ...state,
       basePrice: Number(state.basePrice) || 0,
       offers: state.offers.map((offerId) => {
-        const offer = offers.find((offer) => offer.id === offerId);
-        return offer ? { id: offer.id, title: offer.title, price: offer.price } : null;
+        const parsedOffer = offers.find((offer) => offer.id === offerId);
+        return parsedOffer ? { id: parsedOffer.id, title: parsedOffer.title, price: parsedOffer.price } : null;
       }).filter(Boolean),
     };
   }
