@@ -8,13 +8,14 @@ function createTripInfoTemplate(events, destinations, offersByType) {
     return '';
   }
 
-  const destinationNames = events.map(
-    (event) => destinations.find((dest) => dest.id === event.destination).name
-  );
+  // Получаем уникальные названия городов в порядке их появления
+  const destinationNames = events
+    .map((event) => destinations.find((dest) => dest.id === event.destination)?.name)
+    .filter((name, index, self) => name && self.indexOf(name) === index); // удаляем дубликаты
 
   const tripInfoTitle =
     destinationNames.length > 3
-      ? `${destinationNames[0]} &mdash; ... &mdash; ${destinationNames[destinationNames.length - 1]}`
+      ? `${destinationNames[0]} &mdash;...&mdash; ${destinationNames[destinationNames.length - 1]}`
       : destinationNames.join(' &mdash; ');
 
   const tripStartTime = Math.min(...events.map((event) => event.dateFrom));
@@ -49,6 +50,7 @@ function createTripInfoTemplate(events, destinations, offersByType) {
     </section>`
   );
 }
+
 
 
 export default class TripInfoView extends AbstractView {
