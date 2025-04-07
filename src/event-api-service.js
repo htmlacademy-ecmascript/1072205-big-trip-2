@@ -64,12 +64,12 @@ export default class EventApiService extends ApiService {
     return {
       id: event.id,
       type: event.type.toLowerCase(),
-      base_price: event.basePrice,
-      date_from: event.dateFrom.toISOString(),
-      date_to: event.dateTo.toISOString(),
+      ['base_price']: event.basePrice,
+      ['date_from']: event.dateFrom.toISOString(),
+      ['date_to']: event.dateTo.toISOString(),
       destination: event.destination,
       offers: Array.isArray(event.offers) ? event.offers : event.offers.map((offer) => offer.id),
-      is_favorite: event.isFavorite ?? false,
+      ['is_favorite']: event.isFavorite ?? false,
     };
   }
 
